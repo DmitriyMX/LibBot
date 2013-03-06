@@ -8,7 +8,6 @@ import ch.spacebase.libbot.chat.ChatData;
 import ch.spacebase.libbot.chat.cmd.CommandManager;
 import ch.spacebase.libbot.module.Module;
 
-
 public abstract class Bot {
 
 	private boolean running = true;

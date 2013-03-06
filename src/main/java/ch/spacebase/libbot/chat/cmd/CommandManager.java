@@ -7,6 +7,8 @@ import java.util.List;
 import ch.spacebase.libbot.chat.ChatData;
 import ch.spacebase.libbot.chat.cmd.parser.CommandParser;
 import ch.spacebase.libbot.chat.cmd.parser.SpacedCommandParser;
+import ch.spacebase.libbot.chat.cmd.permission.EmptyPermissionManager;
+import ch.spacebase.libbot.chat.cmd.permission.PermissionManager;
 import ch.spacebase.libbot.module.Module;
 
 
@@ -14,6 +16,7 @@ public class CommandManager {
 
 	private List<CommandExecutor> executors = new ArrayList<CommandExecutor>();
 	private CommandParser parser = new SpacedCommandParser();
+	private PermissionManager permManager = new EmptyPermissionManager();
 	private String prefix = "#";
 	
 	public CommandParser getParser() {
@@ -22,6 +25,14 @@ public class CommandManager {
 	
 	public void setParser(CommandParser parser) {
 		this.parser = parser;
+	}
+	
+	public PermissionManager getPermissionManager() {
+		return this.permManager;
+	}
+	
+	public void setPermissionManager(PermissionManager manager) {
+		this.permManager = manager;
 	}
 	
 	public String getPrefix() {
@@ -51,7 +62,11 @@ public class CommandManager {
 		}
 		
 		Command command = exec.getCommand();
-		// TODO: permission check
+		if(!this.permManager.hasPermission(message.getUser(), command.permission())) {
+			source.chat("You don't have permission to use \"" + cmd + "\", " + message.getUser() + ".");
+			return;
+		}
+		
 		if(args.length < command.min() || (command.max() != -1 && args.length > command.max())) {
 			source.chat("Incorrect usage of " + this.prefix + cmd + ", " + message.getUser() + ".");
 			return;
