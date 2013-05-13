@@ -7,6 +7,7 @@ import ch.spacebase.libbot.Bot;
 import ch.spacebase.libbot.LibraryInfo;
 import ch.spacebase.libbot.chat.ChatData;
 import ch.spacebase.libbot.module.Module;
+import ch.spacebase.mcprotocol.event.DisconnectEvent;
 import ch.spacebase.mcprotocol.event.PacketRecieveEvent;
 import ch.spacebase.mcprotocol.event.ProtocolListener;
 import ch.spacebase.mcprotocol.exception.ConnectException;
@@ -15,8 +16,6 @@ import ch.spacebase.mcprotocol.exception.OutdatedLibraryException;
 import ch.spacebase.mcprotocol.net.Client;
 import ch.spacebase.mcprotocol.standard.StandardProtocol;
 import ch.spacebase.mcprotocol.standard.packet.PacketChat;
-import ch.spacebase.mcprotocol.standard.packet.PacketDisconnect;
-
 
 public class MinecraftModule implements Module {
 
@@ -93,7 +92,6 @@ public class MinecraftModule implements Module {
 	private class BotListener extends ProtocolListener {
 		private static final int LOGIN = 1;
 		private static final int CHAT = 3;
-		private static final int DISCONNECT = 255;
 		
 		@Override
 		public void onPacketRecieve(PacketRecieveEvent event) {
@@ -102,9 +100,12 @@ public class MinecraftModule implements Module {
 				chat("Using " + LibraryInfo.NAME + " v" + LibraryInfo.VERSION + ".");
 			} else if(event.getPacket().getId() == CHAT) {
 				this.parseChat(event.getPacket(PacketChat.class).getMessage());
-			} else if(event.getPacket().getId() == DISCONNECT) {
-				disconnect(event.getPacket(PacketDisconnect.class).getReason());
 			}
+		}
+		
+		@Override
+		public void onDisconnect(DisconnectEvent event) {
+			disconnect(event.getReason());
 		}
 		
 		private void parseChat(String msg) {
