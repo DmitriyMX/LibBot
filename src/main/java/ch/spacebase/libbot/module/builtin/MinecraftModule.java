@@ -9,6 +9,7 @@ import ch.spacebase.libbot.chat.ChatData;
 import ch.spacebase.libbot.module.Module;
 import ch.spacebase.mcprotocol.event.DisconnectEvent;
 import ch.spacebase.mcprotocol.event.PacketRecieveEvent;
+import ch.spacebase.mcprotocol.event.PacketSendEvent;
 import ch.spacebase.mcprotocol.event.ProtocolListener;
 import ch.spacebase.mcprotocol.exception.ConnectException;
 import ch.spacebase.mcprotocol.exception.LoginException;
@@ -101,6 +102,10 @@ public class MinecraftModule implements Module {
 			} else if(event.getPacket().getId() == CHAT) {
 				this.parseChat(event.getPacket(PacketChat.class).getMessage());
 			}
+		}
+		
+		@Override
+		public void onPacketSend(PacketSendEvent event) {
 		}
 		
 		@Override
