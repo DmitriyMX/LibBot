@@ -15,7 +15,7 @@ import ch.spacebase.mcprotocol.exception.ConnectException;
 import ch.spacebase.mcprotocol.exception.LoginException;
 import ch.spacebase.mcprotocol.exception.OutdatedLibraryException;
 import ch.spacebase.mcprotocol.net.Client;
-import ch.spacebase.mcprotocol.standard.StandardProtocol;
+import ch.spacebase.mcprotocol.standard.StandardClient;
 import ch.spacebase.mcprotocol.standard.packet.PacketChat;
 
 public class MinecraftModule implements Module {
@@ -30,14 +30,14 @@ public class MinecraftModule implements Module {
 		this.bot = bot;
 		this.username = username;
 		this.password = password;
-		this.conn = new Client(new StandardProtocol(), host, port);
+		this.conn = new StandardClient(host, port);
 		this.conn.listen(new BotListener());
 	}
 	
 	@Override
 	public void connect() {
 		try {
-			this.conn.setUser(this.username, this.password);
+			this.conn.login(this.username, this.password);
 		} catch (LoginException e) {
 			e.printStackTrace();
 			return;
@@ -95,7 +95,7 @@ public class MinecraftModule implements Module {
 		private static final int CHAT = 3;
 		
 		@Override
-		public void onPacketRecieve(PacketRecieveEvent event) {
+		public void onPacketReceive(PacketRecieveEvent event) {
 			if(event.getPacket().getId() == LOGIN) {
 				chat(bot.getName() + " v" + bot.getVersion() + " connected.");
 				chat("Using " + LibraryInfo.NAME + " v" + LibraryInfo.VERSION + ".");
