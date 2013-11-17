@@ -8,7 +8,7 @@ import ch.spacebase.libbot.LibraryInfo;
 import ch.spacebase.libbot.chat.ChatData;
 import ch.spacebase.libbot.module.Module;
 import ch.spacebase.mcprotocol.event.DisconnectEvent;
-import ch.spacebase.mcprotocol.event.PacketRecieveEvent;
+import ch.spacebase.mcprotocol.event.PacketReceiveEvent;
 import ch.spacebase.mcprotocol.event.PacketSendEvent;
 import ch.spacebase.mcprotocol.event.ProtocolListener;
 import ch.spacebase.mcprotocol.exception.ConnectException;
@@ -95,7 +95,7 @@ public class MinecraftModule implements Module {
 		private static final int CHAT = 3;
 		
 		@Override
-		public void onPacketReceive(PacketRecieveEvent event) {
+		public void onPacketReceive(PacketReceiveEvent event) {
 			if(event.getPacket().getId() == LOGIN) {
 				chat(bot.getName() + " v" + bot.getVersion() + " connected.");
 				chat("Using " + LibraryInfo.NAME + " v" + LibraryInfo.VERSION + ".");

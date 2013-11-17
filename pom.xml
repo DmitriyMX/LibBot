@@ -18,17 +18,23 @@
 	</licenses>
 
 	<scm>
-    		<connection>scm:git:git@github.com:Steveice10/LibBot.git</connection>
+    	<connection>scm:git:git@github.com:Steveice10/LibBot.git</connection>
 		<developerConnection>scm:git:git@github.com:Steveice10/LibBot.git</developerConnection>
 		<url>git@github.com:Steveice10/LibBot/</url>
 	</scm>
 
-       <distributionManagement>        
-                <repository>            
-                        <id>dropbox</id>                        
-                        <url>file:///home/steven/Dropbox/Public/maven</url>                      
-                </repository>           
-        </distributionManagement> 
+	<distributionManagement>
+		<repository>
+			<id>Spacebase Artifactory</id>
+			<name>Spacebase Artifactory-releases</name>
+			<url>http://repo.spacebase.ch/artifactory/main</url>
+		</repository>
+		<snapshotRepository>
+			<id>Spacebase Artifactory</id>
+			<name>Spacebase Artifactory-snapshots</name>
+			<url>http://repo.spacebase.ch/artifactory/main</url>
+		</snapshotRepository>
+	</distributionManagement>
 
   	<developers>
     		<developer>
@@ -43,10 +49,10 @@
 	</properties>
 
 	<repositories>
-              	<repository>
-              	     	<id>spacebase</id>
-              	      	<url>http://repo.spacebase.ch</url>
-              	</repository>
+			<repository>
+				<id>Spacebase Artifactory</id>
+				<url>http://repo.spacebase.ch/artifactory/main</url>
+			</repository>
 	</repositories>
 
 	<!--  Dependencies -->
