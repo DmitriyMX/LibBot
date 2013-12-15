@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>ch.spacebase</groupId>
 	<artifactId>libbot</artifactId>
-	<version>1.0.0</version>
+	<version>1.1</version>
 	<packaging>jar</packaging>
 
 	<name>LibBot</name>
@@ -63,8 +63,8 @@
 	<dependencies>
 		<dependency>
 			<groupId>ch.spacebase</groupId>
-			<artifactId>mc-protocol-lib</artifactId>
-			<version>dev-SNAPSHOT</version>
+			<artifactId>mcprotocollib</artifactId>
+			<version>1.7.2-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>pircbot</groupId>

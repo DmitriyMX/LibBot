@@ -57,7 +57,7 @@ public class CommandManager {
 		String args[] = this.parser.getArguments(msg);
 		ExecutionInfo exec = this.getCommand(cmd);
 		if(exec == null) {
-			source.chat("Unknown command, " + message.getUser() + ". Try using \"" + this.prefix + "help\" for a list of commands.");
+			source.chat("Unknown command, " + message.getUser() + ".");
 			return;
 		}
 		

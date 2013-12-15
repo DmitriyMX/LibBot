@@ -7,56 +7,42 @@ import ch.spacebase.libbot.Bot;
 import ch.spacebase.libbot.LibraryInfo;
 import ch.spacebase.libbot.chat.ChatData;
 import ch.spacebase.libbot.module.Module;
-import ch.spacebase.mcprotocol.event.DisconnectEvent;
-import ch.spacebase.mcprotocol.event.PacketReceiveEvent;
-import ch.spacebase.mcprotocol.event.PacketSendEvent;
-import ch.spacebase.mcprotocol.event.ProtocolListener;
-import ch.spacebase.mcprotocol.exception.ConnectException;
-import ch.spacebase.mcprotocol.exception.LoginException;
-import ch.spacebase.mcprotocol.exception.OutdatedLibraryException;
-import ch.spacebase.mcprotocol.net.Client;
-import ch.spacebase.mcprotocol.standard.StandardClient;
-import ch.spacebase.mcprotocol.standard.packet.PacketChat;
+import ch.spacebase.mc.auth.exceptions.AuthenticationException;
+import ch.spacebase.mc.protocol.MinecraftProtocol;
+import ch.spacebase.mc.protocol.packet.ingame.client.ClientChatPacket;
+import ch.spacebase.mc.protocol.packet.ingame.server.ServerChatPacket;
+import ch.spacebase.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
+import ch.spacebase.mc.util.message.Message;
+import ch.spacebase.packetlib.Client;
+import ch.spacebase.packetlib.event.session.DisconnectedEvent;
+import ch.spacebase.packetlib.event.session.PacketReceivedEvent;
+import ch.spacebase.packetlib.event.session.SessionAdapter;
+import ch.spacebase.packetlib.tcp.TcpSessionFactory;
 
 public class MinecraftModule implements Module {
 
 	private Bot bot;
 	private Client conn;
 	private String username;
-	private String password;
 	private List<ChatData> incoming = new ArrayList<ChatData>();
 	
-	public MinecraftModule(Bot bot, String host, int port, String username, String password) {
+	public MinecraftModule(Bot bot, String host, int port, String username, String password) throws AuthenticationException {
 		this.bot = bot;
 		this.username = username;
-		this.password = password;
-		this.conn = new StandardClient(host, port);
-		this.conn.listen(new BotListener());
+		this.conn = new Client(host, port, new MinecraftProtocol(username, password), new TcpSessionFactory());
+		this.conn.getSession().addListener(new BotListener());
 	}
 	
 	@Override
 	public void connect() {
-		try {
-			this.conn.login(this.username, this.password);
-		} catch (LoginException e) {
-			e.printStackTrace();
-			return;
-		} catch (OutdatedLibraryException e) {
-			e.printStackTrace();
-			return;
-		}
-		
-		try {
-			this.conn.connect();
-		} catch (ConnectException e) {
-			e.printStackTrace();
-		}
+		this.conn.getSession().connect();
 	}
 
 	@Override
 	public void disconnect(String reason) {
-		System.out.println(this.getMessagePrefix() + " Disconnected: " + reason);
-		if(this.conn.isConnected()) this.conn.disconnect(reason);
+		if(this.conn.getSession().isConnected()) {
+			this.conn.getSession().disconnect(reason);
+		}
 	}
 
 	@Override
@@ -66,7 +52,7 @@ public class MinecraftModule implements Module {
 	
 	@Override
 	public void setUsername(String name) {
-		System.err.println("[NOTICE] Cannot set name using MinecraftModule.");
+		throw new UnsupportedOperationException("Cannot set name using MinecraftModule.");
 	}
 	
 	@Override
@@ -83,43 +69,52 @@ public class MinecraftModule implements Module {
 
 	@Override
 	public void chat(String message) {
-		this.conn.send(new PacketChat("[bot] " + message));
+		this.conn.getSession().send(new ClientChatPacket("[bot] " + message));
 	}
 
 	@Override
 	public void update() {
 	}
 	
-	private class BotListener extends ProtocolListener {
-		private static final int LOGIN = 1;
-		private static final int CHAT = 3;
+	private class BotListener extends SessionAdapter {
 		
 		@Override
-		public void onPacketReceive(PacketReceiveEvent event) {
-			if(event.getPacket().getId() == LOGIN) {
+		public void packetReceived(PacketReceivedEvent event) {
+			if(event.getPacket() instanceof ServerJoinGamePacket) {
 				chat(bot.getName() + " v" + bot.getVersion() + " connected.");
 				chat("Using " + LibraryInfo.NAME + " v" + LibraryInfo.VERSION + ".");
-			} else if(event.getPacket().getId() == CHAT) {
-				this.parseChat(event.getPacket(PacketChat.class).getMessage());
+			} else if(event.getPacket() instanceof ServerChatPacket) {
+				this.parseChat(event.<ServerChatPacket>getPacket().getMessage());
 			}
 		}
 		
 		@Override
-		public void onPacketSend(PacketSendEvent event) {
+		public void disconnected(DisconnectedEvent event) {
+			System.out.println(getMessagePrefix() + " Disconnected: " + new Message(event.getReason()).getRawText());
 		}
 		
-		@Override
-		public void onDisconnect(DisconnectEvent event) {
-			disconnect(event.getReason());
-		}
-		
-		private void parseChat(String msg) {
-			String user = msg.replaceAll("§[1-9a-z]", "").substring(0, msg.indexOf(' '));
-			String message = msg.replaceAll("§[1-9a-z]", "").substring(msg.indexOf(' '));
-			// Parse common chat formatting
-			user = user.replaceAll("<", "").replaceAll(">", "").replace(" [g]: ", "");
-			if(message.startsWith(": ")) message = message.replaceFirst(": ", "");
-			incoming.add(new ChatData(user, message));
+		private void parseChat(Message message) {
+			String user = null;
+			String msg = null;
+			if(message.getTranslate() == null || message.getTranslateWith() == null) {
+				String text = message.getRawText();
+				user = text.replaceAll("§[1-9a-z]", "").substring(0, text.indexOf(' '));
+				msg = text.replaceAll("§[1-9a-z]", "").substring(text.indexOf(' '));
+				// Parse common chat formatting
+				user = user.replaceAll("<", "").replaceAll(">", "").replace(" [g]: ", "");
+				if(msg.startsWith(": ")) {
+					msg = msg.replaceFirst(": ", "");
+				}
+			} else {
+				if(message.getTranslate().equals("chat.type.text")) {
+					user = message.getTranslateWith()[0].getText();
+					msg = message.getTranslateWith()[1].getText();
+				}
+			}
+			
+			if(user != null && msg != null) {
+				incoming.add(new ChatData(user, msg));
+			}
 		}
 	}
 
