@@ -3,6 +3,7 @@ package ch.spacebase.libbot.example;
 import ch.spacebase.libbot.Bot;
 import ch.spacebase.libbot.chat.cmd.parser.EnclosedCommandParser;
 import ch.spacebase.libbot.module.builtin.ConsoleModule;
+import ch.spacebase.libbot.module.builtin.IRCModule;
 import ch.spacebase.libbot.module.builtin.MinecraftModule;
 import ch.spacebase.mc.auth.exceptions.AuthenticationException;
 
@@ -24,7 +25,7 @@ public class ExampleBot extends Bot {
 			e.printStackTrace();
 		}
 		
-		//this.addModule(new IRCModule(this, "ExampleBot", "localhost", "#channel"));
+		this.addModule(new IRCModule(this, "ExampleBot", "localhost", "#channel"));
 	}
 
 }
