@@ -9,10 +9,12 @@ import ch.spacebase.libbot.chat.ChatData;
 import ch.spacebase.libbot.module.Module;
 import ch.spacebase.mc.auth.exceptions.AuthenticationException;
 import ch.spacebase.mc.protocol.MinecraftProtocol;
+import ch.spacebase.mc.protocol.data.message.Message;
+import ch.spacebase.mc.protocol.data.message.TextMessage;
+import ch.spacebase.mc.protocol.data.message.TranslationMessage;
 import ch.spacebase.mc.protocol.packet.ingame.client.ClientChatPacket;
 import ch.spacebase.mc.protocol.packet.ingame.server.ServerChatPacket;
 import ch.spacebase.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
-import ch.spacebase.mc.util.message.Message;
 import ch.spacebase.packetlib.Client;
 import ch.spacebase.packetlib.event.session.DisconnectedEvent;
 import ch.spacebase.packetlib.event.session.PacketReceivedEvent;
@@ -29,7 +31,7 @@ public class MinecraftModule implements Module {
 	public MinecraftModule(Bot bot, String host, int port, String username, String password) throws AuthenticationException {
 		this.bot = bot;
 		this.username = username;
-		this.conn = new Client(host, port, new MinecraftProtocol(username, password), new TcpSessionFactory());
+		this.conn = new Client(host, port, new MinecraftProtocol(username, password, false), new TcpSessionFactory());
 		this.conn.getSession().addListener(new BotListener());
 	}
 	
@@ -90,14 +92,14 @@ public class MinecraftModule implements Module {
 		
 		@Override
 		public void disconnected(DisconnectedEvent event) {
-			System.out.println(getMessagePrefix() + " Disconnected: " + new Message(event.getReason()).getRawText());
+			System.out.println(getMessagePrefix() + " Disconnected: " + Message.fromString(event.getReason()).getFullText());
 		}
 		
 		private void parseChat(Message message) {
 			String user = null;
 			String msg = null;
-			if(message.getTranslate() == null || message.getTranslateWith() == null) {
-				String text = message.getRawText();
+			if(message instanceof TextMessage) {
+				String text = message.getText();
 				user = text.replaceAll("§[1-9a-z]", "").substring(0, text.indexOf(' '));
 				msg = text.replaceAll("§[1-9a-z]", "").substring(text.indexOf(' '));
 				// Parse common chat formatting
@@ -106,9 +108,10 @@ public class MinecraftModule implements Module {
 					msg = msg.replaceFirst(": ", "");
 				}
 			} else {
-				if(message.getTranslate().equals("chat.type.text")) {
-					user = message.getTranslateWith()[0].getText();
-					msg = message.getTranslateWith()[1].getText();
+				TranslationMessage trans = (TranslationMessage) message;
+				if(trans.getTranslationKey().equals("chat.type.text")) {
+					user = trans.getTranslationParams()[0].getFullText();
+					msg = trans.getTranslationParams()[1].getFullText();
 				}
 			}
 			

@@ -64,7 +64,7 @@
 		<dependency>
 			<groupId>ch.spacebase</groupId>
 			<artifactId>mcprotocollib</artifactId>
-			<version>1.7.2-SNAPSHOT</version>
+			<version>1.7.4-SNAPSHOT</version>
 		</dependency>
 		<dependency>
 			<groupId>pircbot</groupId>
