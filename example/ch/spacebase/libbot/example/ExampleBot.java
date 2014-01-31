@@ -5,7 +5,7 @@ import ch.spacebase.libbot.chat.cmd.parser.EnclosedCommandParser;
 import ch.spacebase.libbot.module.builtin.ConsoleModule;
 import ch.spacebase.libbot.module.builtin.IRCModule;
 import ch.spacebase.libbot.module.builtin.MinecraftModule;
-import ch.spacebase.mc.auth.exceptions.AuthenticationException;
+import ch.spacebase.mc.auth.exception.AuthenticationException;
 
 public class ExampleBot extends Bot {
 

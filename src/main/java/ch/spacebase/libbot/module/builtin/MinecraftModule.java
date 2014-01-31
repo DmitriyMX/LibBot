@@ -7,7 +7,7 @@ import ch.spacebase.libbot.Bot;
 import ch.spacebase.libbot.LibraryInfo;
 import ch.spacebase.libbot.chat.ChatData;
 import ch.spacebase.libbot.module.Module;
-import ch.spacebase.mc.auth.exceptions.AuthenticationException;
+import ch.spacebase.mc.auth.exception.AuthenticationException;
 import ch.spacebase.mc.protocol.MinecraftProtocol;
 import ch.spacebase.mc.protocol.data.message.Message;
 import ch.spacebase.mc.protocol.data.message.TextMessage;

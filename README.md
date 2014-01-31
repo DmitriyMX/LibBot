@@ -12,7 +12,7 @@ LibBot is a simple library for creating chat bots in Java. It supports running m
 <b>How do I use it?</b>
 --------
 
-If you would like to see some examples, check out the examples package in the library's source.
+If you would like to see some examples, check out the source code in the example folder.
 
 
 <b>Building the Source</b>
