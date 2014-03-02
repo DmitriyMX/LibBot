@@ -1,107 +1,108 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
-	<groupId>ch.spacebase</groupId>
-	<artifactId>libbot</artifactId>
-	<version>1.2-SNAPSHOT</version>
-	<packaging>jar</packaging>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>org.spacehq</groupId>
+    <artifactId>libbot</artifactId>
+    <version>1.2-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
-	<name>LibBot</name>
-	<description>A simple library for programing bots in Java.</description>
-	<url>http://github.com/Steveice10/LibBot/</url>
+    <name>LibBot</name>
+    <description>A simple library for programing bots in Java.</description>
+    <url>http://github.com/Steveice10/LibBot/</url>
 
-	<licenses>
-		<license>
-			<name>MIT</name>
-			<url>http://www.opensource.org/licenses/mit-license.html</url>
-			<distribution>repo</distribution>
-		</license>
-	</licenses>
+    <licenses>
+        <license>
+            <name>MIT</name>
+            <url>http://www.opensource.org/licenses/mit-license.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
 
-	<scm>
-    	<connection>scm:git:git@github.com:Steveice10/LibBot.git</connection>
-		<developerConnection>scm:git:git@github.com:Steveice10/LibBot.git</developerConnection>
-		<url>git@github.com:Steveice10/LibBot/</url>
-	</scm>
+    <scm>
+        <connection>scm:git:git@github.com:Steveice10/LibBot.git</connection>
+        <developerConnection>scm:git:git@github.com:Steveice10/LibBot.git</developerConnection>
+        <url>git@github.com:Steveice10/LibBot/</url>
+    </scm>
 
-	<distributionManagement>
-		<repository>
-			<id>spacebase</id>
-			<name>spacebase-releases</name>
-			<url>http://repo.spacebase.ch/content/repositories/release/</url>
-		</repository>
-		<snapshotRepository>
-			<id>spacebase</id>
-			<name>spacebase-snapshots</name>
-			<url>http://repo.spacebase.ch/content/repositories/snapshots/</url>
-		</snapshotRepository>
-	</distributionManagement>
+    <distributionManagement>
+        <repository>
+            <id>spacehq</id>
+            <name>spacehq-releases</name>
+            <url>http://repo.spacehq.org/content/repositories/release/</url>
+        </repository>
+        <snapshotRepository>
+            <id>spacehq</id>
+            <name>spacehq-snapshots</name>
+            <url>http://repo.spacehq.org/content/repositories/snapshots/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
-  	<developers>
-    	<developer>
-      		<id>steveice10</id>
-      		<name>Steveice10</name>
-      		<email>Steveice10@gmail.com</email>
-    	</developer>
-  	</developers>
+    <developers>
+        <developer>
+            <id>steveice10</id>
+            <name>Steveice10</name>
+            <email>Steveice10@gmail.com</email>
+        </developer>
+    </developers>
 
     <repositories>
-		<repository>
-			<id>spacebase-releases</id>
-			<url>http://repo.spacebase.ch/content/repositories/release/</url>
-		</repository>
-		<repository>
-			<id>spacebase-snapshots</id>
-			<url>http://repo.spacebase.ch/content/repositories/snapshots/</url>
-		</repository>
+        <repository>
+            <id>spacehq-releases</id>
+            <url>http://repo.spacehq.org/content/repositories/release/</url>
+        </repository>
+        <repository>
+            <id>spacehq-snapshots</id>
+            <url>http://repo.spacehq.org/content/repositories/snapshots/</url>
+        </repository>
     </repositories>
 
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
-	<!--  Dependencies -->
-	<dependencies>
-		<dependency>
-			<groupId>ch.spacebase</groupId>
-			<artifactId>mcprotocollib</artifactId>
-			<version>1.7.4-SNAPSHOT</version>
-		</dependency>
-		<dependency>
-			<groupId>pircbot</groupId>
-			<artifactId>pircbot</artifactId>
-			<version>1.5.0</version>
-		</dependency>
-	</dependencies>
+    <!--  Dependencies -->
+    <dependencies>
+        <dependency>
+            <groupId>org.spacehq</groupId>
+            <artifactId>mcprotocollib</artifactId>
+            <version>1.7.4-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>pircbot</groupId>
+            <artifactId>pircbot</artifactId>
+            <version>1.5.0</version>
+        </dependency>
+    </dependencies>
 
-	<build>
-		<defaultGoal>clean install</defaultGoal>
-		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
-		<plugins>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<version>2.3.2</version>
-			</plugin>
-			<!-- JAR creation plugin -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-jar-plugin</artifactId>
-				<version>2.3.2</version>
-			</plugin>
-			<!-- JAR dependency addition plugin -->
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>1.5</version>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-					</execution>
-				</executions>
-			</plugin>
-		</plugins>
-	</build>
+    <build>
+        <defaultGoal>clean install</defaultGoal>
+        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+            </plugin>
+            <!-- JAR creation plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>2.3.2</version>
+            </plugin>
+            <!-- JAR dependency addition plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.5</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

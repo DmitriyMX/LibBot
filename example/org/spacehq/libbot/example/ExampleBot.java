@@ -1,18 +1,18 @@
-package ch.spacebase.libbot.example;
+package org.spacehq.libbot.example;
 
-import ch.spacebase.libbot.Bot;
-import ch.spacebase.libbot.chat.cmd.parser.EnclosedCommandParser;
-import ch.spacebase.libbot.module.builtin.ConsoleModule;
-import ch.spacebase.libbot.module.builtin.IRCModule;
-import ch.spacebase.libbot.module.builtin.MinecraftModule;
-import ch.spacebase.mc.auth.exception.AuthenticationException;
+import org.spacehq.libbot.Bot;
+import org.spacehq.libbot.chat.cmd.parser.EnclosedCommandParser;
+import org.spacehq.libbot.module.builtin.ConsoleModule;
+import org.spacehq.libbot.module.builtin.IRCModule;
+import org.spacehq.libbot.module.builtin.MinecraftModule;
+import org.spacehq.mc.auth.exception.AuthenticationException;
 
 public class ExampleBot extends Bot {
 
 	public static void main(String args[]) {
 		new ExampleBot().start("ExampleBot", "1.0", args);
 	}
-	
+
 	@Override
 	public void initBot(String[] args) {
 		this.getCommandManager().setParser(new EnclosedCommandParser());
@@ -24,7 +24,7 @@ public class ExampleBot extends Bot {
 			System.err.println("Failed to authenticate Minecraft bot module!");
 			e.printStackTrace();
 		}
-		
+
 		this.addModule(new IRCModule(this, "ExampleBot", "localhost", "#channel"));
 	}
 

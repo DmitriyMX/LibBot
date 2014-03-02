@@ -1,4 +1,4 @@
-package ch.spacebase.libbot.chat.cmd;
+package org.spacehq.libbot.chat.cmd;
 
 public interface CommandExecutor {
 }

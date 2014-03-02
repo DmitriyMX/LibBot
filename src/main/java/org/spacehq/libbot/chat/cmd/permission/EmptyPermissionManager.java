@@ -1,4 +1,4 @@
-package ch.spacebase.libbot.chat.cmd.permission;
+package org.spacehq.libbot.chat.cmd.permission;
 
 public class EmptyPermissionManager implements PermissionManager {
 

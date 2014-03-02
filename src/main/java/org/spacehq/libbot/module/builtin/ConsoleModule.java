@@ -1,4 +1,8 @@
-package ch.spacebase.libbot.module.builtin;
+package org.spacehq.libbot.module.builtin;
+
+import org.spacehq.libbot.Bot;
+import org.spacehq.libbot.chat.ChatData;
+import org.spacehq.libbot.module.Module;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -6,21 +10,17 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import ch.spacebase.libbot.Bot;
-import ch.spacebase.libbot.chat.ChatData;
-import ch.spacebase.libbot.module.Module;
-
 
 public class ConsoleModule implements Module {
 
 	private List<ChatData> incoming = new ArrayList<ChatData>();
 	private ConsoleReader reader = new ConsoleReader();
 	private Bot bot;
-	
+
 	public ConsoleModule(Bot bot) {
 		this.bot = bot;
 	}
-	
+
 	@Override
 	public void connect() {
 		this.reader.start();
@@ -60,10 +60,10 @@ public class ConsoleModule implements Module {
 	@Override
 	public void update() {
 	}
-	
+
 	private class ConsoleReader extends Thread {
 		private boolean reading = true;
-		
+
 		@Override
 		public void run() {
 			BufferedReader read = new BufferedReader(new InputStreamReader(System.in));

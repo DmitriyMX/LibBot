@@ -1,4 +1,4 @@
-package ch.spacebase.libbot.chat.cmd;
+package org.spacehq.libbot.chat.cmd;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -20,5 +20,5 @@ public @interface Command {
 	public int min() default 0;
 
 	public int max() default -1;
-	
+
 }

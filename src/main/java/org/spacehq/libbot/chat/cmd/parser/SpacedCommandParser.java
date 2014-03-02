@@ -1,4 +1,4 @@
-package ch.spacebase.libbot.chat.cmd.parser;
+package org.spacehq.libbot.chat.cmd.parser;
 
 public class SpacedCommandParser implements CommandParser {
 
@@ -11,5 +11,5 @@ public class SpacedCommandParser implements CommandParser {
 	public String[] getArguments(String message) {
 		return message.indexOf(" ") != -1 ? message.substring(message.indexOf(" ") + 1).split(" ") : new String[0];
 	}
-	
+
 }

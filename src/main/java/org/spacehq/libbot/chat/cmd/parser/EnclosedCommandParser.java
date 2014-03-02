@@ -1,4 +1,4 @@
-package ch.spacebase.libbot.chat.cmd.parser;
+package org.spacehq.libbot.chat.cmd.parser;
 
 public class EnclosedCommandParser implements CommandParser {
 

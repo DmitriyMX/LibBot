@@ -1,25 +1,25 @@
-package ch.spacebase.libbot.module.builtin;
+package org.spacehq.libbot.module.builtin;
+
+import org.spacehq.libbot.Bot;
+import org.spacehq.libbot.LibraryInfo;
+import org.spacehq.libbot.chat.ChatData;
+import org.spacehq.libbot.module.Module;
+import org.spacehq.mc.auth.exception.AuthenticationException;
+import org.spacehq.mc.protocol.MinecraftProtocol;
+import org.spacehq.mc.protocol.data.message.Message;
+import org.spacehq.mc.protocol.data.message.TextMessage;
+import org.spacehq.mc.protocol.data.message.TranslationMessage;
+import org.spacehq.mc.protocol.packet.ingame.client.ClientChatPacket;
+import org.spacehq.mc.protocol.packet.ingame.server.ServerChatPacket;
+import org.spacehq.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
+import org.spacehq.packetlib.Client;
+import org.spacehq.packetlib.event.session.DisconnectedEvent;
+import org.spacehq.packetlib.event.session.PacketReceivedEvent;
+import org.spacehq.packetlib.event.session.SessionAdapter;
+import org.spacehq.packetlib.tcp.TcpSessionFactory;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import ch.spacebase.libbot.Bot;
-import ch.spacebase.libbot.LibraryInfo;
-import ch.spacebase.libbot.chat.ChatData;
-import ch.spacebase.libbot.module.Module;
-import ch.spacebase.mc.auth.exception.AuthenticationException;
-import ch.spacebase.mc.protocol.MinecraftProtocol;
-import ch.spacebase.mc.protocol.data.message.Message;
-import ch.spacebase.mc.protocol.data.message.TextMessage;
-import ch.spacebase.mc.protocol.data.message.TranslationMessage;
-import ch.spacebase.mc.protocol.packet.ingame.client.ClientChatPacket;
-import ch.spacebase.mc.protocol.packet.ingame.server.ServerChatPacket;
-import ch.spacebase.mc.protocol.packet.ingame.server.ServerJoinGamePacket;
-import ch.spacebase.packetlib.Client;
-import ch.spacebase.packetlib.event.session.DisconnectedEvent;
-import ch.spacebase.packetlib.event.session.PacketReceivedEvent;
-import ch.spacebase.packetlib.event.session.SessionAdapter;
-import ch.spacebase.packetlib.tcp.TcpSessionFactory;
 
 public class MinecraftModule implements Module {
 
@@ -27,14 +27,14 @@ public class MinecraftModule implements Module {
 	private Client conn;
 	private String username;
 	private List<ChatData> incoming = new ArrayList<ChatData>();
-	
+
 	public MinecraftModule(Bot bot, String host, int port, String username, String password) throws AuthenticationException {
 		this.bot = bot;
 		this.username = username;
 		this.conn = new Client(host, port, new MinecraftProtocol(username, password, false), new TcpSessionFactory());
 		this.conn.getSession().addListener(new BotListener());
 	}
-	
+
 	@Override
 	public void connect() {
 		this.conn.getSession().connect();
@@ -51,17 +51,17 @@ public class MinecraftModule implements Module {
 	public String getUsername() {
 		return this.username;
 	}
-	
+
 	@Override
 	public void setUsername(String name) {
 		throw new UnsupportedOperationException("Cannot set name using MinecraftModule.");
 	}
-	
+
 	@Override
 	public String getMessagePrefix() {
 		return "[Minecraft]";
 	}
-	
+
 	@Override
 	public List<ChatData> getIncomingChat() {
 		List<ChatData> ret = new ArrayList<ChatData>(this.incoming);
@@ -77,9 +77,9 @@ public class MinecraftModule implements Module {
 	@Override
 	public void update() {
 	}
-	
+
 	private class BotListener extends SessionAdapter {
-		
+
 		@Override
 		public void packetReceived(PacketReceivedEvent event) {
 			if(event.getPacket() instanceof ServerJoinGamePacket) {
@@ -89,12 +89,12 @@ public class MinecraftModule implements Module {
 				this.parseChat(event.<ServerChatPacket>getPacket().getMessage());
 			}
 		}
-		
+
 		@Override
 		public void disconnected(DisconnectedEvent event) {
 			System.out.println(getMessagePrefix() + " Disconnected: " + Message.fromString(event.getReason()).getFullText());
 		}
-		
+
 		private void parseChat(Message message) {
 			String user = null;
 			String msg = null;
@@ -114,7 +114,7 @@ public class MinecraftModule implements Module {
 					msg = trans.getTranslationParams()[1].getFullText();
 				}
 			}
-			
+
 			if(user != null && msg != null) {
 				incoming.add(new ChatData(user, msg));
 			}
