@@ -4,7 +4,7 @@ import org.spacehq.libbot.Bot;
 import org.spacehq.libbot.LibraryInfo;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
-import org.spacehq.mc.auth.exceptions.AuthenticationException;
+import org.spacehq.mc.auth.exception.AuthenticationException;
 import org.spacehq.mc.protocol.MinecraftProtocol;
 import org.spacehq.mc.protocol.data.message.Message;
 import org.spacehq.mc.protocol.data.message.TextMessage;
