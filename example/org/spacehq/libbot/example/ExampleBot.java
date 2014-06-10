@@ -1,31 +1,37 @@
 package org.spacehq.libbot.example;
 
 import org.spacehq.libbot.Bot;
-import org.spacehq.libbot.chat.cmd.parser.EnclosedCommandParser;
+import org.spacehq.libbot.chat.cmd.parser.SpacedCommandParser;
 import org.spacehq.libbot.module.builtin.ConsoleModule;
 import org.spacehq.libbot.module.builtin.IRCModule;
 import org.spacehq.libbot.module.builtin.MinecraftModule;
-import org.spacehq.mc.auth.exception.AuthenticationException;
+import org.spacehq.libbot.module.builtin.SkypeModule;
 
 public class ExampleBot extends Bot {
+	private static final boolean MINECRAFT = true;
+	private static final boolean IRC = true;
+	private static final boolean SKYPE = true;
 
 	public static void main(String args[]) {
-		new ExampleBot().start("ExampleBot", "1.0", args);
+		new ExampleBot().start("ExampleBot", "1.0", true, args);
 	}
 
 	@Override
 	public void initBot(String[] args) {
-		this.getCommandManager().setParser(new EnclosedCommandParser());
+		this.getCommandManager().setPrefix("#");
+		this.getCommandManager().setParser(new SpacedCommandParser());
 		this.getCommandManager().register(new ExampleCommands());
 		this.addModule(new ConsoleModule(this));
-		try {
+		if(MINECRAFT) {
 			this.addModule(new MinecraftModule(this, "localhost", 25565, "user", "pass"));
-		} catch(AuthenticationException e) {
-			System.err.println("Failed to authenticate Minecraft bot module!");
-			e.printStackTrace();
 		}
 
-		this.addModule(new IRCModule(this, "ExampleBot", "localhost", "#channel"));
-	}
+		if(IRC) {
+			this.addModule(new IRCModule(this, "ExampleBot", "localhost", "#channel"));
+		}
 
+		if(SKYPE) {
+			this.addModule(new SkypeModule("Skype chat title"));
+		}
+	}
 }

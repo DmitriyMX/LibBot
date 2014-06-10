@@ -69,6 +69,7 @@ public class CommandManager {
 
 		if(args.length < command.min() || (command.max() != -1 && args.length > command.max())) {
 			source.chat("Incorrect usage of " + this.prefix + cmd + ", " + message.getUser() + ".");
+			source.chat("Usage: " + this.prefix + cmd + " " + command.usage());
 			return;
 		}
 

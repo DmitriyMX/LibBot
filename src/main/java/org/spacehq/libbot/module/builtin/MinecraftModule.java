@@ -4,6 +4,7 @@ import org.spacehq.libbot.Bot;
 import org.spacehq.libbot.LibraryInfo;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
+import org.spacehq.libbot.module.ModuleException;
 import org.spacehq.mc.auth.exception.AuthenticationException;
 import org.spacehq.mc.protocol.MinecraftProtocol;
 import org.spacehq.mc.protocol.data.message.Message;
@@ -24,20 +25,31 @@ import java.util.List;
 public class MinecraftModule implements Module {
 
 	private Bot bot;
-	private Client conn;
+	private String host;
+	private int port;
 	private String username;
+	private String password;
+
+	private Client conn;
 	private List<ChatData> incoming = new ArrayList<ChatData>();
 
-	public MinecraftModule(Bot bot, String host, int port, String username, String password) throws AuthenticationException {
+	public MinecraftModule(Bot bot, String host, int port, String username, String password) {
 		this.bot = bot;
+		this.host = host;
+		this.port = port;
 		this.username = username;
-		this.conn = new Client(host, port, new MinecraftProtocol(username, password, false), new TcpSessionFactory());
-		this.conn.getSession().addListener(new BotListener());
+		this.password = password;
 	}
 
 	@Override
 	public void connect() {
-		this.conn.getSession().connect();
+		try {
+			this.conn = new Client(this.host, this.port, new MinecraftProtocol(this.username, this.password, false), new TcpSessionFactory());
+			this.conn.getSession().addListener(new BotListener());
+			this.conn.getSession().connect();
+		} catch(AuthenticationException e) {
+			throw new ModuleException("Failed to authenticate MinecraftModule.", e);
+		}
 	}
 
 	@Override
