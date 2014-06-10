@@ -80,7 +80,9 @@ public class IRCModule extends PircBot implements Module {
 
 	@Override
 	public void chat(String message) {
-		this.sendMessage(this.channel, "[bot] " + message);
+		for(String msg : message.split("\n")) {
+			this.sendMessage(this.channel, msg);
+		}
 	}
 
 	@Override

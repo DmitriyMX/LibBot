@@ -83,7 +83,9 @@ public class MinecraftModule implements Module {
 
 	@Override
 	public void chat(String message) {
-		this.conn.getSession().send(new ClientChatPacket("[bot] " + message));
+		for(String msg : message.split("\n")) {
+			this.conn.getSession().send(new ClientChatPacket(msg));
+		}
 	}
 
 	@Override

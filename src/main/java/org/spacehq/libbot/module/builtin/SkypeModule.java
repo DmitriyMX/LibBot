@@ -93,7 +93,9 @@ public class SkypeModule implements Module {
 	public void chat(String message) {
 		if(this.chat != null) {
 			try {
-				this.chat.send(message);
+				for(String msg : message.split("\n")) {
+					this.chat.send(msg);
+				}
 			} catch(SkypeException e) {
 				throw new ModuleException("Failed to send chat message.", e);
 			}

@@ -18,6 +18,10 @@ public class CommandManager {
 	private CommandParser parser = new SpacedCommandParser();
 	private PermissionManager permManager = new EmptyPermissionManager();
 	private String prefix = "#";
+	private String unknownCommandFormat = "Unknown command \"%1$s\", %2$s.";
+	private String noPermissionFormat = "You don't have permission to use \"%1$s\", %2$s.";
+	private String incorrectUsageFormat = "Incorrect usage of \"%1$s\", %2$s.";
+	private String usageFormat = "Usage: %1$s";
 
 	public CommandParser getParser() {
 		return this.parser;
@@ -43,6 +47,38 @@ public class CommandManager {
 		this.prefix = prefix;
 	}
 
+	public String getUnknownCommandFormat() {
+		return this.unknownCommandFormat;
+	}
+
+	public void setUnknownCommandFormat(String format) {
+		this.unknownCommandFormat = format;
+	}
+
+	public String getNoPermissionFormat() {
+		return this.noPermissionFormat;
+	}
+
+	public void setNoPermissionFormat(String format) {
+		this.noPermissionFormat = format;
+	}
+
+	public String getIncorrectUsageFormat() {
+		return this.incorrectUsageFormat;
+	}
+
+	public void setIncorrectUsageFormat(String format) {
+		this.incorrectUsageFormat = format;
+	}
+
+	public String getUsageFormat() {
+		return this.usageFormat;
+	}
+
+	public void setUsageFormat(String format) {
+		this.usageFormat = format;
+	}
+
 	public void register(CommandExecutor exec) {
 		this.executors.add(exec);
 	}
@@ -54,22 +90,35 @@ public class CommandManager {
 	public void execute(Module source, ChatData message) {
 		String msg = message.getMessage().substring(this.prefix.length());
 		String cmd = this.parser.getCommand(msg);
+		String prefixed = this.prefix + cmd;
 		String args[] = this.parser.getArguments(msg);
 		ExecutionInfo exec = this.getCommand(cmd);
 		if(exec == null) {
-			source.chat("Unknown command, " + message.getUser() + ".");
+			if(this.unknownCommandFormat != null) {
+				source.chat(String.format(this.unknownCommandFormat, prefixed, message.getUser()));
+			}
+
 			return;
 		}
 
 		Command command = exec.getCommand();
 		if(!this.permManager.hasPermission(message.getUser(), command.permission())) {
-			source.chat("You don't have permission to use \"" + cmd + "\", " + message.getUser() + ".");
+			if(this.noPermissionFormat != null) {
+				source.chat(String.format(this.noPermissionFormat, prefixed, message.getUser()));
+			}
+
 			return;
 		}
 
 		if(args.length < command.min() || (command.max() != -1 && args.length > command.max())) {
-			source.chat("Incorrect usage of " + this.prefix + cmd + ", " + message.getUser() + ".");
-			source.chat("Usage: " + this.prefix + cmd + " " + command.usage());
+			if(this.incorrectUsageFormat != null) {
+				source.chat(String.format(this.incorrectUsageFormat, prefixed, message.getUser()));
+			}
+
+			if(this.usageFormat != null) {
+				source.chat(String.format(this.usageFormat, prefixed + " " + command.usage()));
+			}
+
 			return;
 		}
 
