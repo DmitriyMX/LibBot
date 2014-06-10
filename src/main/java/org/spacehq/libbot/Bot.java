@@ -44,6 +44,8 @@ public abstract class Bot {
 
 	public abstract void initBot(String args[]);
 
+	public abstract void onChat(ChatData data);
+
 	private final void run() {
 		while(this.isRunning()) {
 			for(Module module : this.modules.values()) {
@@ -53,6 +55,7 @@ public abstract class Bot {
 					for(ChatData data : chat) {
 						if(data != null) {
 							System.out.println(module.getMessagePrefix() + " " + data.getUser() + ": " + data.getMessage());
+							this.onChat(data);
 							if(data.getMessage().startsWith(this.getCommandManager().getPrefix()) && (this.acceptSelfCommands || !data.getUser().equals(module.getUsername()))) {
 								try {
 									this.commands.execute(module, data);

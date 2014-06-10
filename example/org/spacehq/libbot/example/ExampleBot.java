@@ -1,6 +1,7 @@
 package org.spacehq.libbot.example;
 
 import org.spacehq.libbot.Bot;
+import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.chat.cmd.parser.SpacedCommandParser;
 import org.spacehq.libbot.module.builtin.ConsoleModule;
 import org.spacehq.libbot.module.builtin.IRCModule;
@@ -33,5 +34,9 @@ public class ExampleBot extends Bot {
 		if(SKYPE) {
 			this.addModule(new SkypeModule("Skype chat title"));
 		}
+	}
+
+	@Override
+	public void onChat(ChatData data) {
 	}
 }
