@@ -5,7 +5,6 @@ import org.spacehq.libbot.chat.cmd.CommandExecutor;
 import org.spacehq.libbot.module.Module;
 
 public class ExampleCommands implements CommandExecutor {
-
 	@Command(aliases = { "hello" }, desc = "Says hello!", min = 2, usage = "<hi> <hi>", permission = "example.hello")
 	public void hello(Module source, String sender, String alias, String args[]) {
 		if(args[0].equals("hi") && args[1].equals("hi")) {
@@ -15,5 +14,4 @@ public class ExampleCommands implements CommandExecutor {
 			source.chat("You put: " + args[0] + ", " + args[1]);
 		}
 	}
-
 }

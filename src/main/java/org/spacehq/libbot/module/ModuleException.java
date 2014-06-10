@@ -1,6 +1,8 @@
 package org.spacehq.libbot.module;
 
 public class ModuleException extends RuntimeException {
+	private static final long serialVersionUID = 1;
+
 	public ModuleException() {
 		super();
 	}

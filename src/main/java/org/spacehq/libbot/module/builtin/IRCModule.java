@@ -12,9 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class IRCModule extends PircBot implements Module {
-
 	private Bot bot;
 	private String host;
 	private String channel;
@@ -93,5 +91,4 @@ public class IRCModule extends PircBot implements Module {
 	public void onMessage(String channel, String sender, String login, String hostname, String message) {
 		this.incoming.add(new ChatData(sender, message));
 	}
-
 }

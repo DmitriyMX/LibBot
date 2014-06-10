@@ -23,7 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MinecraftModule implements Module {
-
 	private Bot bot;
 	private String host;
 	private int port;
@@ -93,7 +92,6 @@ public class MinecraftModule implements Module {
 	}
 
 	private class BotListener extends SessionAdapter {
-
 		@Override
 		public void packetReceived(PacketReceivedEvent event) {
 			if(event.getPacket() instanceof ServerJoinGamePacket) {
@@ -134,5 +132,4 @@ public class MinecraftModule implements Module {
 			}
 		}
 	}
-
 }

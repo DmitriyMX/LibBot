@@ -10,9 +10,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class ConsoleModule implements Module {
-
 	private List<ChatData> incoming = new ArrayList<ChatData>();
 	private ConsoleReader reader = new ConsoleReader();
 	private Bot bot;
@@ -23,7 +21,7 @@ public class ConsoleModule implements Module {
 
 	@Override
 	public void connect() {
-		this.reader.start();
+		new Thread(this.reader, "ConsoleReader").start();
 	}
 
 	@Override
@@ -61,8 +59,12 @@ public class ConsoleModule implements Module {
 	public void update() {
 	}
 
-	private class ConsoleReader extends Thread {
+	private class ConsoleReader implements Runnable {
 		private boolean reading = true;
+
+		public void stopReading() {
+			this.reading = false;
+		}
 
 		@Override
 		public void run() {
@@ -83,10 +85,5 @@ public class ConsoleModule implements Module {
 				}
 			}
 		}
-
-		public void stopReading() {
-			this.reading = false;
-		}
 	}
-
 }

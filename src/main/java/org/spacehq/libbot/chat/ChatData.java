@@ -1,7 +1,6 @@
 package org.spacehq.libbot.chat;
 
 public class ChatData {
-
 	private String user;
 	private String message;
 
@@ -17,5 +16,4 @@ public class ChatData {
 	public String getMessage() {
 		return this.message;
 	}
-
 }

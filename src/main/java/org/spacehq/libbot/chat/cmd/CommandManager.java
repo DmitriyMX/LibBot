@@ -8,13 +8,11 @@ import org.spacehq.libbot.chat.cmd.permission.PermissionManager;
 import org.spacehq.libbot.module.Module;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-
+import java.util.HashMap;
+import java.util.Map;
 
 public class CommandManager {
-
-	private List<CommandExecutor> executors = new ArrayList<CommandExecutor>();
+	private Map<String, ExecutionInfo> commands = new HashMap<String, ExecutionInfo>();
 	private CommandParser parser = new SpacedCommandParser();
 	private PermissionManager permManager = new EmptyPermissionManager();
 	private String prefix = "#";
@@ -80,11 +78,23 @@ public class CommandManager {
 	}
 
 	public void register(CommandExecutor exec) {
-		this.executors.add(exec);
+		for(Method method : exec.getClass().getDeclaredMethods()) {
+			Command command = method.getAnnotation(Command.class);
+			if(command != null) {
+				for(String alias : command.aliases()) {
+					this.commands.put(alias, new ExecutionInfo(exec, command, method));
+				}
+			}
+		}
 	}
 
 	public void remove(CommandExecutor exec) {
-		this.executors.remove(exec);
+		for(String command : this.commands.keySet()) {
+			ExecutionInfo info = this.commands.get(command);
+			if(info.getExecutor() == exec) {
+				this.commands.remove(command);
+			}
+		}
 	}
 
 	public void execute(Module source, ChatData message) {
@@ -92,7 +102,7 @@ public class CommandManager {
 		String cmd = this.parser.getCommand(msg);
 		String prefixed = this.prefix + cmd;
 		String args[] = this.parser.getArguments(msg);
-		ExecutionInfo exec = this.getCommand(cmd);
+		ExecutionInfo exec = this.commands.get(cmd);
 		if(exec == null) {
 			if(this.unknownCommandFormat != null) {
 				source.chat(String.format(this.unknownCommandFormat, prefixed, message.getUser()));
@@ -125,32 +135,23 @@ public class CommandManager {
 		exec.execute(source, message.getUser(), cmd, args);
 	}
 
-	private ExecutionInfo getCommand(String name) {
-		for(CommandExecutor exec : this.executors) {
-			for(Method m : exec.getClass().getDeclaredMethods()) {
-				Command cmd = m.getAnnotation(Command.class);
-				if(cmd != null) {
-					for(String alias : cmd.aliases()) {
-						if(alias.equalsIgnoreCase(name)) {
-							return new ExecutionInfo(m, cmd, exec);
-						}
-					}
-				}
-			}
-		}
-
-		return null;
-	}
-
 	private static class ExecutionInfo {
-		private Method method;
-		private Command cmd;
 		private CommandExecutor executor;
+		private Command cmd;
+		private Method method;
 
-		public ExecutionInfo(Method method, Command cmd, CommandExecutor executor) {
+		public ExecutionInfo(CommandExecutor executor, Command cmd, Method method) {
 			this.method = method;
 			this.cmd = cmd;
 			this.executor = executor;
+		}
+
+		public CommandExecutor getExecutor() {
+			return this.executor;
+		}
+
+		public Command getCommand() {
+			return this.cmd;
 		}
 
 		public void execute(Module source, String sender, String alias, String args[]) {
@@ -161,10 +162,5 @@ public class CommandManager {
 				e.printStackTrace();
 			}
 		}
-
-		public Command getCommand() {
-			return this.cmd;
-		}
 	}
-
 }

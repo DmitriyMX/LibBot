@@ -8,7 +8,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Command {
-
 	public String[] aliases();
 
 	public String desc();
@@ -20,5 +19,4 @@ public @interface Command {
 	public int min() default 0;
 
 	public int max() default -1;
-
 }

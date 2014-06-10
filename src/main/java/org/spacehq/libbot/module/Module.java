@@ -4,9 +4,7 @@ import org.spacehq.libbot.chat.ChatData;
 
 import java.util.List;
 
-
 public interface Module {
-
 	public void connect();
 
 	public void disconnect(String reason);
@@ -22,5 +20,4 @@ public interface Module {
 	public void chat(String message);
 
 	public void update();
-
 }

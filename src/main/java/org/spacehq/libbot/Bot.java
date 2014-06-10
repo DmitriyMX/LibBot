@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 public abstract class Bot {
-
 	private boolean running = true;
 	private String name;
 	private String version;
@@ -21,13 +20,13 @@ public abstract class Bot {
 		this.name = name;
 		this.version = version;
 		this.acceptSelfCommands = acceptSelfCommands;
-		System.out.println("Starting " + this.getName() + " v" + this.getVersion() + "...");
+		System.out.println("Starting " + this.name + " v" + this.version + "...");
 		System.out.println("Using " + LibraryInfo.NAME + " v" + LibraryInfo.VERSION);
 		this.initBot(args);
 		for(Module module : this.modules.values()) {
 			System.out.println(module.getMessagePrefix() + " Connecting module...");
-			if(module.getUsername() == null || module.getUsername().equals("")) {
-				module.setUsername(LibraryInfo.NAME);
+			if(module.getUsername() == null || module.getUsername().isEmpty()) {
+				module.setUsername(this.name);
 			}
 
 			try {
@@ -47,7 +46,7 @@ public abstract class Bot {
 	public abstract void onChat(ChatData data);
 
 	private final void run() {
-		while(this.isRunning()) {
+		while(this.running) {
 			for(Module module : this.modules.values()) {
 				try {
 					module.update();
@@ -56,7 +55,7 @@ public abstract class Bot {
 						if(data != null) {
 							System.out.println(module.getMessagePrefix() + " " + data.getUser() + ": " + data.getMessage());
 							this.onChat(data);
-							if(data.getMessage().startsWith(this.getCommandManager().getPrefix()) && (this.acceptSelfCommands || !data.getUser().equals(module.getUsername()))) {
+							if(data.getMessage().startsWith(this.commands.getPrefix()) && (this.acceptSelfCommands || !data.getUser().equals(module.getUsername()))) {
 								try {
 									this.commands.execute(module, data);
 								} catch(Exception e) {
@@ -92,36 +91,35 @@ public abstract class Bot {
 		}
 	}
 
-	public boolean isRunning() {
+	public final boolean isRunning() {
 		return this.running;
 	}
 
-	public void stop() {
+	public final void stop() {
 		this.running = false;
 	}
 
-	public String getName() {
+	public final String getName() {
 		return this.name;
 	}
 
-	public String getVersion() {
+	public final String getVersion() {
 		return this.version;
 	}
 
-	public CommandManager getCommandManager() {
+	public final CommandManager getCommandManager() {
 		return this.commands;
 	}
 
-	public Module addModule(Module module) {
+	public final Module addModule(Module module) {
 		return this.modules.put(module.getClass(), module);
 	}
 
-	public Module getModule(Class<? extends Module> clazz) {
+	public final Module getModule(Class<? extends Module> clazz) {
 		return this.modules.get(clazz);
 	}
 
-	public Module removeModule(Class<? extends Module> clazz) {
+	public final Module removeModule(Class<? extends Module> clazz) {
 		return this.modules.remove(clazz);
 	}
-
 }
