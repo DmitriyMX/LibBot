@@ -8,7 +8,9 @@ import org.spacehq.libbot.chat.cmd.permission.PermissionManager;
 import org.spacehq.libbot.module.Module;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class CommandManager {
@@ -97,6 +99,28 @@ public class CommandManager {
 		}
 	}
 
+	public List<Command> getCommands() {
+		List<Command> ret = new ArrayList<Command>();
+		for(ExecutionInfo info : this.commands.values()) {
+			if(!ret.contains(info.getCommand())) {
+				ret.add(info.getCommand());
+			}
+		}
+
+		return ret;
+	}
+
+	public List<Command> getCommands(String user) {
+		List<Command> ret = new ArrayList<Command>();
+		for(ExecutionInfo info : this.commands.values()) {
+			if(!ret.contains(info.getCommand()) && this.permManager.hasPermission(user, info.getCommand().permission())) {
+				ret.add(info.getCommand());
+			}
+		}
+
+		return ret;
+	}
+
 	public void execute(Module source, ChatData message) {
 		String msg = message.getMessage().substring(this.prefix.length());
 		String cmd = this.parser.getCommand(msg);
@@ -132,7 +156,7 @@ public class CommandManager {
 			return;
 		}
 
-		exec.execute(source, message.getUser(), cmd, args);
+		exec.execute(source, this, message.getUser(), cmd, args);
 	}
 
 	private static class ExecutionInfo {
@@ -154,9 +178,9 @@ public class CommandManager {
 			return this.cmd;
 		}
 
-		public void execute(Module source, String sender, String alias, String args[]) {
+		public void execute(Module source, CommandManager commands, String sender, String alias, String args[]) {
 			try {
-				this.method.invoke(this.executor, source, sender, alias, args);
+				this.method.invoke(this.executor, source, commands, sender, alias, args);
 			} catch(Exception e) {
 				System.err.println("Error executing command.");
 				e.printStackTrace();

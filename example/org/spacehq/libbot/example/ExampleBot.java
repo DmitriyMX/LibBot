@@ -2,6 +2,7 @@ package org.spacehq.libbot.example;
 
 import org.spacehq.libbot.Bot;
 import org.spacehq.libbot.chat.ChatData;
+import org.spacehq.libbot.chat.cmd.builtin.HelpCommand;
 import org.spacehq.libbot.chat.cmd.parser.SpacedCommandParser;
 import org.spacehq.libbot.module.builtin.ConsoleModule;
 import org.spacehq.libbot.module.builtin.IRCModule;
@@ -21,6 +22,7 @@ public class ExampleBot extends Bot {
 	public void initBot(String[] args) {
 		this.getCommandManager().setPrefix("#");
 		this.getCommandManager().setParser(new SpacedCommandParser());
+		this.getCommandManager().register(new HelpCommand(10));
 		this.getCommandManager().register(new ExampleCommands());
 		this.addModule(new ConsoleModule(this));
 		if(MINECRAFT) {
