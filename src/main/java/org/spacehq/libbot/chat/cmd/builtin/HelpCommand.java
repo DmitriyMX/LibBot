@@ -17,7 +17,7 @@ public class HelpCommand implements CommandExecutor {
 
 	@Command(aliases = {"help", "cmds", "commands"}, desc = "Shows a list of all bot commands.", usage = "[page]", min = 0, max = 1, permission = "bot.help")
 	public void shutdown(Module source, CommandManager commands, String sender, String alias, String args[]) {
-		List<Command> cmds = commands.getCommands(sender);
+		List<Command> cmds = commands.getCommands(source, sender);
 		int pages = (int) Math.ceil(cmds.size() / (float) this.linesPerPage);
 		if(pages == 0) {
 			source.chat("No commands are available for you to use, " + sender + ".");

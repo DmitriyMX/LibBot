@@ -1,10 +1,10 @@
 package org.spacehq.libbot.chat.cmd.permission;
 
-public class EmptyPermissionManager implements PermissionManager {
+import org.spacehq.libbot.module.Module;
 
+public class EmptyPermissionManager implements PermissionManager {
 	@Override
-	public boolean hasPermission(String user, String permission) {
+	public boolean hasPermission(Module source, String user, String permission) {
 		return true;
 	}
-
 }

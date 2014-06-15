@@ -110,10 +110,10 @@ public class CommandManager {
 		return ret;
 	}
 
-	public List<Command> getCommands(String user) {
+	public List<Command> getCommands(Module source, String user) {
 		List<Command> ret = new ArrayList<Command>();
 		for(ExecutionInfo info : this.commands.values()) {
-			if(!ret.contains(info.getCommand()) && this.permManager.hasPermission(user, info.getCommand().permission())) {
+			if(!ret.contains(info.getCommand()) && this.permManager.hasPermission(source, user, info.getCommand().permission())) {
 				ret.add(info.getCommand());
 			}
 		}
@@ -136,7 +136,7 @@ public class CommandManager {
 		}
 
 		Command command = exec.getCommand();
-		if(!this.permManager.hasPermission(message.getUser(), command.permission())) {
+		if(!this.permManager.hasPermission(source, message.getUser(), command.permission())) {
 			if(this.noPermissionFormat != null) {
 				source.chat(String.format(this.noPermissionFormat, prefixed, message.getUser()));
 			}
