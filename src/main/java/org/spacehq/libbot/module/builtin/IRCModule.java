@@ -3,8 +3,6 @@ package org.spacehq.libbot.module.builtin;
 import org.jibble.pircbot.IrcException;
 import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
-import org.spacehq.libbot.Bot;
-import org.spacehq.libbot.LibraryInfo;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
 
@@ -13,13 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class IRCModule extends PircBot implements Module {
-	private Bot bot;
 	private String host;
 	private String channel;
 	private List<ChatData> incoming = new ArrayList<ChatData>();
 
-	public IRCModule(Bot bot, String username, String host, String channel) {
-		this.bot = bot;
+	public IRCModule(String username, String host, String channel) {
 		this.setName(username);
 		this.host = host;
 		this.channel = channel;
@@ -44,13 +40,14 @@ public class IRCModule extends PircBot implements Module {
 		}
 
 		this.joinChannel(this.channel);
-		this.chat(this.bot.getName() + " v" + this.bot.getVersion() + " connected.");
-		this.chat("Using " + LibraryInfo.NAME + " v" + LibraryInfo.VERSION + ".");
 	}
 
 	@Override
 	public void disconnect(String reason) {
-		System.out.println(this.getMessagePrefix() + " Disconnected: " + reason);
+		if(this.isConnected()) {
+			System.out.println(this.getMessagePrefix() + " Disconnected: " + reason);
+		}
+
 		this.quitServer(reason);
 	}
 

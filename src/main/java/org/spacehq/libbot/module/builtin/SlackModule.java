@@ -47,6 +47,7 @@ public class SlackModule implements Module {
 			return;
 		}
 
+		System.out.println(this.getMessagePrefix() + " Disconnected: " + reason);
 		this.call("channels.leave", "channel", this.channelId);
 		this.channelId = null;
 		this.lastReceived = 0;
@@ -81,7 +82,9 @@ public class SlackModule implements Module {
 			return;
 		}
 
-		this.call("chat.postMessage", "channel", this.channelId, "text", message, "username", this.username);
+		for(String msg : message.split("\n")) {
+			this.call("chat.postMessage", "channel", this.channelId, "text", msg, "username", this.username);
+		}
 	}
 
 	@Override

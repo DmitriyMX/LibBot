@@ -60,6 +60,10 @@ public class SkypeModule implements Module {
 
 	@Override
 	public void disconnect(String reason) {
+		if(this.chat != null) {
+			System.out.println(this.getMessagePrefix() + " Disconnected: " + reason);
+		}
+
 		this.chat = null;
 	}
 

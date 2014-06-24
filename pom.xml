@@ -68,6 +68,11 @@
             <version>1.7.4-SNAPSHOT</version>
         </dependency>
         <dependency>
+            <groupId>org.spacehq</groupId>
+            <artifactId>classicprotocollib</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
             <groupId>pircbot</groupId>
             <artifactId>pircbot</artifactId>
             <version>1.5.0</version>

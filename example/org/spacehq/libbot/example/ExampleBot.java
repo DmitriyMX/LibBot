@@ -8,6 +8,7 @@ import org.spacehq.libbot.module.builtin.*;
 
 public class ExampleBot extends Bot {
 	private static final boolean MINECRAFT = true;
+	private static final boolean MINECRAFT_CLASSIC = true;
 	private static final boolean IRC = true;
 	private static final boolean SKYPE = true;
 	private static final boolean SLACK = true;
@@ -24,11 +25,15 @@ public class ExampleBot extends Bot {
 		this.getCommandManager().register(new ExampleCommands());
 		this.addModule(new ConsoleModule(this));
 		if(MINECRAFT) {
-			this.addModule(new MinecraftModule(this, "localhost", 25565, "user", "pass"));
+			this.addModule(new MinecraftModule("localhost", 25565, "Username", "Password"));
+		}
+
+		if(MINECRAFT_CLASSIC) {
+			this.addModule(new MinecraftClassicModule("Username", "Password", "Server URL"));
 		}
 
 		if(IRC) {
-			this.addModule(new IRCModule(this, "ExampleBot", "localhost", "#channel"));
+			this.addModule(new IRCModule("ExampleBot", "localhost", "#channel"));
 		}
 
 		if(SKYPE) {
