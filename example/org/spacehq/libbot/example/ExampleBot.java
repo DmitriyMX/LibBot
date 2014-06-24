@@ -12,6 +12,7 @@ public class ExampleBot extends Bot {
 	private static final boolean IRC = true;
 	private static final boolean SKYPE = true;
 	private static final boolean SLACK = true;
+	private static final boolean HIP_CHAT = true;
 
 	public static void main(String args[]) {
 		new ExampleBot().start("ExampleBot", "1.0", true, args);
@@ -42,6 +43,10 @@ public class ExampleBot extends Bot {
 
 		if(SLACK) {
 			this.addModule(new SlackModule("Token", "#channel", "Username"));
+		}
+
+		if(HIP_CHAT) {
+			this.addModule(new HipChatModule("Token", "Room", "Username"));
 		}
 	}
 

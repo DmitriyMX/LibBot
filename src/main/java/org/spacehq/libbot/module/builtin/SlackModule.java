@@ -37,8 +37,8 @@ public class SlackModule implements Module {
 
 	@Override
 	public void connect() {
-		this.lastReceived = System.currentTimeMillis() / 1000.0;
 		this.channelId = this.call("channels.join", "name", this.channel).get("channel").getAsJsonObject().get("id").getAsString();
+		this.lastReceived = System.currentTimeMillis() / 1000.0;
 	}
 
 	@Override
