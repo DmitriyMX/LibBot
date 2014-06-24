@@ -35,6 +35,7 @@ public abstract class Bot {
 			} catch(Exception e) {
 				System.err.println(module.getMessagePrefix() + " An error occured while connecting the module.");
 				e.printStackTrace();
+				this.modules.remove(module.getClass());
 			}
 		}
 

@@ -6,7 +6,7 @@
 <b>What is LibBot?</b>
 --------
 
-LibBot is a simple library for creating chat bots in Java. It supports running multiple chat protocols and connections simultaniously and seperately using a Module system. It comes with built-in console, Minecraft, Skype, and IRC chat modules and a basic command system.
+LibBot is a simple library for creating chat bots in Java. It supports running multiple chat protocols and connections simultaniously and seperately using a Module system. It comes with built-in console, Minecraft, Skype, Slack, and IRC chat modules and a basic command system.
 
 
 <b>How do I use it?</b>

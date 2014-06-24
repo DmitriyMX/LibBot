@@ -4,15 +4,13 @@ import org.spacehq.libbot.Bot;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.chat.cmd.builtin.HelpCommand;
 import org.spacehq.libbot.chat.cmd.parser.SpacedCommandParser;
-import org.spacehq.libbot.module.builtin.ConsoleModule;
-import org.spacehq.libbot.module.builtin.IRCModule;
-import org.spacehq.libbot.module.builtin.MinecraftModule;
-import org.spacehq.libbot.module.builtin.SkypeModule;
+import org.spacehq.libbot.module.builtin.*;
 
 public class ExampleBot extends Bot {
 	private static final boolean MINECRAFT = true;
 	private static final boolean IRC = true;
 	private static final boolean SKYPE = true;
+	private static final boolean SLACK = true;
 
 	public static void main(String args[]) {
 		new ExampleBot().start("ExampleBot", "1.0", true, args);
@@ -35,6 +33,10 @@ public class ExampleBot extends Bot {
 
 		if(SKYPE) {
 			this.addModule(new SkypeModule("Skype chat title"));
+		}
+
+		if(SLACK) {
+			this.addModule(new SlackModule("Token", "#channel", "Username"));
 		}
 	}
 
