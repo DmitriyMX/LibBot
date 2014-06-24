@@ -117,6 +117,10 @@ public class SlackModule implements Module {
 		}
 
 		this.lastReceived = latest;
+		try {
+			Thread.sleep(500);
+		} catch(InterruptedException e) {
+		}
 	}
 
 	private JsonObject call(String method, String... params) {
