@@ -92,7 +92,11 @@ public class SkypeModule implements Module {
 
 	@Override
 	public void setUsername(String name) {
-		throw new UnsupportedOperationException("Cannot set name using SkypeModule.");
+		try {
+			Skype.getProfile().setFullName(name);
+		} catch(SkypeException e) {
+			throw new ModuleException("Failed to set username.", e);
+		}
 	}
 
 	@Override
