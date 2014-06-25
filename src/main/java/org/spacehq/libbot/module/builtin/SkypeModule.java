@@ -6,6 +6,7 @@ import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.module.ModuleException;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -64,6 +65,18 @@ public class SkypeModule implements Module {
 				public void chatMessageSent(ChatMessage chatMessage) throws SkypeException {
 					if(chatId.equals(chatMessage.getChat().getId())) {
 						incoming.add(new ChatData(chatMessage.getSender().getFullName(), chatMessage.getContent()));
+					}
+				}
+			});
+
+			Skype.addChatMessageEditListener(new ChatMessageEditListener() {
+				@Override
+				public void chatMessageEdited(ChatMessage chatMessage, Date date, User user) {
+					try {
+						if(chatId.equals(chatMessage.getChat().getId())) {
+							incoming.add(new ChatData(chatMessage.getSender().getFullName(), chatMessage.getContent()));
+						}
+					} catch(SkypeException e) {
 					}
 				}
 			});
@@ -131,7 +144,6 @@ public class SkypeModule implements Module {
 	private static String getChatId(String chatName) {
 		try {
 			for(Chat chat : Skype.getAllChats()) {
-				System.out.println(chat.getWindowTitle() + ", " + chat.getId());
 				if(chat.getWindowTitle().startsWith(chatName)) {
 					return chat.getId();
 				}
