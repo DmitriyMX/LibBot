@@ -55,14 +55,17 @@ public abstract class Bot {
 					for(ChatData data : chat) {
 						if(data != null) {
 							System.out.println(module.getMessagePrefix() + " " + data.getUser() + ": " + data.getMessage());
-							this.onChat(module, data);
-							if(data.getMessage().startsWith(this.commands.getPrefix()) && (this.acceptSelfCommands || !data.getUser().equals(module.getUsername()))) {
-								try {
-									this.commands.execute(module, data);
-								} catch(Exception e) {
-									System.err.println(module.getMessagePrefix() + " An error occured while executing a command.");
-									e.printStackTrace();
+							if(data.getMessage().startsWith(this.commands.getPrefix())) {
+								if(this.acceptSelfCommands || !data.getUser().equals(module.getUsername())) {
+									try {
+										this.commands.execute(module, data);
+									} catch(Exception e) {
+										System.err.println(module.getMessagePrefix() + " An error occured while executing a command.");
+										e.printStackTrace();
+									}
 								}
+							} else {
+								this.onChat(module, data);
 							}
 						}
 					}
