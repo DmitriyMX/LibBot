@@ -11,12 +11,21 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SkypeModule implements Module {
 	private String chatName;
+	private String chatId;
 	private Chat chat;
 
 	private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
 
 	public SkypeModule(String chat) {
-		this.chatName = chat;
+		this(chat, false);
+	}
+
+	public SkypeModule(String chat, boolean name) {
+		if(name) {
+			this.chatName = chat;
+		} else {
+			this.chatId = chat;
+		}
 	}
 
 	@Override
@@ -26,33 +35,38 @@ public class SkypeModule implements Module {
 				throw new ModuleException("Skype is not running.");
 			}
 
-			Skype.addChatMessageListener(new ChatMessageListener() {
-				@Override
-				public void chatMessageReceived(ChatMessage chatMessage) throws SkypeException {
-					if(chatName.equals(chatMessage.getChat().getWindowTitle())) {
-						incoming.add(new ChatData(chatMessage.getSender().getFullName(), chatMessage.getContent()));
-					}
-				}
-
-				@Override
-				public void chatMessageSent(ChatMessage chatMessage) throws SkypeException {
-					if(chatName.equals(chatMessage.getChat().getWindowTitle())) {
-						incoming.add(new ChatData(chatMessage.getSender().getFullName(), chatMessage.getContent()));
-					}
-				}
-			});
+			if(this.chatName != null) {
+				this.chatId = getChatId(this.chatName);
+				this.chatName = null;
+			}
 
 			this.chat = null;
 			for(Chat chat : Skype.getAllChats()) {
-				if(chat.getWindowTitle().startsWith(this.chatName)) {
+				if(chat.getId().startsWith(this.chatId)) {
 					this.chat = chat;
 					break;
 				}
 			}
 
 			if(this.chat == null) {
-				throw new ModuleException("Chat \"" + this.chatName + "\" does not exist.");
+				throw new ModuleException("Chat \"" + this.chatId + "\" does not exist.");
 			}
+
+			Skype.addChatMessageListener(new ChatMessageListener() {
+				@Override
+				public void chatMessageReceived(ChatMessage chatMessage) throws SkypeException {
+					if(chatId.equals(chatMessage.getChat().getId())) {
+						incoming.add(new ChatData(chatMessage.getSender().getFullName(), chatMessage.getContent()));
+					}
+				}
+
+				@Override
+				public void chatMessageSent(ChatMessage chatMessage) throws SkypeException {
+					if(chatId.equals(chatMessage.getChat().getId())) {
+						incoming.add(new ChatData(chatMessage.getSender().getFullName(), chatMessage.getContent()));
+					}
+				}
+			});
 		} catch(SkypeException e) {
 			throw new ModuleException("Failed to connect Skype module.", e);
 		}
@@ -110,5 +124,21 @@ public class SkypeModule implements Module {
 
 	@Override
 	public void update() {
+	}
+
+	private static String getChatId(String chatName) {
+		try {
+			for(Chat chat : Skype.getAllChats()) {
+				System.out.println(chat.getWindowTitle() + ", " + chat.getId());
+				if(chat.getWindowTitle().startsWith(chatName)) {
+					return chat.getId();
+				}
+			}
+		} catch(SkypeException e) {
+			System.err.println("Failed to get chat ID for chat \"" + chatName + "\".");
+			e.printStackTrace();
+		}
+
+		return "";
 	}
 }

@@ -4,6 +4,7 @@ import org.spacehq.libbot.Bot;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.chat.cmd.builtin.HelpCommand;
 import org.spacehq.libbot.chat.cmd.parser.SpacedCommandParser;
+import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.module.builtin.*;
 
 public class ExampleBot extends Bot {
@@ -38,7 +39,7 @@ public class ExampleBot extends Bot {
 		}
 
 		if(SKYPE) {
-			this.addModule(new SkypeModule("Skype chat title"));
+			this.addModule(new SkypeModule("Skype chat title", true));
 		}
 
 		if(SLACK) {
@@ -51,6 +52,6 @@ public class ExampleBot extends Bot {
 	}
 
 	@Override
-	public void onChat(ChatData data) {
+	public void onChat(Module module, ChatData data) {
 	}
 }
