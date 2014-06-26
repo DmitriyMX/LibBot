@@ -55,15 +55,15 @@ public class SkypeModule implements Module {
 			Skype.addChatMessageListener(new ChatMessageListener() {
 				@Override
 				public void chatMessageReceived(ChatMessage chatMessage) throws SkypeException {
-					if(chatId.equals(chatMessage.getChat().getId())) {
-						incoming.add(new ChatData(chatMessage.getSender().getFullName(), chatMessage.getContent()));
+					if(chatId.equals(chatMessage.getChat().getId()) && !chatMessage.getContent().trim().isEmpty()) {
+						incoming.add(new ChatData(chatMessage.getSender().getFullName(), chatMessage.getContent().trim()));
 					}
 				}
 
 				@Override
 				public void chatMessageSent(ChatMessage chatMessage) throws SkypeException {
-					if(chatId.equals(chatMessage.getChat().getId())) {
-						incoming.add(new ChatData(chatMessage.getSender().getFullName(), chatMessage.getContent()));
+					if(chatId.equals(chatMessage.getChat().getId()) && !chatMessage.getContent().trim().isEmpty()) {
+						incoming.add(new ChatData(chatMessage.getSender().getFullName(), chatMessage.getContent().trim()));
 					}
 				}
 			});
