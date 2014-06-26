@@ -41,7 +41,7 @@ public class HelpCommand implements CommandExecutor {
 			page = pages - 1;
 		}
 
-		StringBuilder build = new StringBuilder(" \n");
+		StringBuilder build = new StringBuilder();
 		build.append("Available commands of ").append(sender).append(" (Page ").append(page + 1).append(" out of ").append(pages).append("):\n");
 		for(int index = page * this.linesPerPage; index < (page + 1) * this.linesPerPage && index < cmds.size(); index++) {
 			Command cmd = cmds.get(index);
