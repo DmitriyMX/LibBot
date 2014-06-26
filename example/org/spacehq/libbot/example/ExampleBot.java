@@ -16,7 +16,7 @@ public class ExampleBot extends Bot {
 	private static final boolean HIP_CHAT = true;
 
 	public static void main(String args[]) {
-		new ExampleBot().start("ExampleBot", "1.0", true, args);
+		new ExampleBot().start(args, true);
 	}
 
 	@Override

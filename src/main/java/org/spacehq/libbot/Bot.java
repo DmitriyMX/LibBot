@@ -11,23 +11,17 @@ import java.util.Map;
 
 public abstract class Bot {
 	private boolean running = true;
-	private String name;
-	private String version;
 	private boolean acceptSelfCommands;
 	private final CommandManager commands = new CommandManager();
 	private final Map<Class<? extends Module>, Module> modules = new LinkedHashMap<Class<? extends Module>, Module>();
 
-	public final void start(String name, String version, boolean acceptSelfCommands, String args[]) {
-		this.name = name;
-		this.version = version;
+	public final void start(String args[], boolean acceptSelfCommands) {
 		this.acceptSelfCommands = acceptSelfCommands;
-		System.out.println("Starting " + this.name + " v" + this.version + "...");
-		System.out.println("Using " + LibraryInfo.NAME + " v" + LibraryInfo.VERSION);
 		this.initBot(args);
 		for(Module module : this.modules.values()) {
 			System.out.println(module.getMessagePrefix() + " Connecting module...");
 			if(module.getUsername() == null || module.getUsername().isEmpty()) {
-				module.setUsername(this.name);
+				module.setUsername("Bot");
 			}
 
 			try {
@@ -109,14 +103,6 @@ public abstract class Bot {
 
 	public final void stop() {
 		this.running = false;
-	}
-
-	public final String getName() {
-		return this.name;
-	}
-
-	public final String getVersion() {
-		return this.version;
 	}
 
 	public final CommandManager getCommandManager() {
