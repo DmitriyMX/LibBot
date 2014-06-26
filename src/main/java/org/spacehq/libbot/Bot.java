@@ -4,7 +4,7 @@ import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.chat.cmd.CommandManager;
 import org.spacehq.libbot.module.Module;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,7 +14,7 @@ public abstract class Bot {
 	private String version;
 	private boolean acceptSelfCommands;
 	private final CommandManager commands = new CommandManager();
-	private final Map<Class<? extends Module>, Module> modules = new HashMap<Class<? extends Module>, Module>();
+	private final Map<Class<? extends Module>, Module> modules = new LinkedHashMap<Class<? extends Module>, Module>();
 
 	public final void start(String name, String version, boolean acceptSelfCommands, String args[]) {
 		this.name = name;
