@@ -41,12 +41,15 @@ public class HelpCommand implements CommandExecutor {
 			page = pages - 1;
 		}
 
-		source.chat("Available commands of " + sender + " (Page " + (page + 1) + " out of " + pages + "):");
+		StringBuilder build = new StringBuilder(" \n");
+		build.append("Available commands of ").append(sender).append(" (Page ").append(page + 1).append(" out of ").append(pages).append("):\n");
 		for(int index = page * this.linesPerPage; index < (page + 1) * this.linesPerPage && index < cmds.size(); index++) {
 			Command cmd = cmds.get(index);
 			String array = Arrays.toString(cmd.aliases());
 			String aliases = cmd.aliases().length > 1 ? "(" + array.substring(1, array.length() - 1) + ")" : cmd.aliases()[0];
-			source.chat(" - " + commands.getPrefix() + aliases + " " + cmd.usage() + ": " + cmd.desc());
+			build.append(" - ").append(commands.getPrefix()).append(aliases).append(" ").append(cmd.usage()).append(": ").append(cmd.desc()).append("\n");
 		}
+
+		source.chat(build.toString());
 	}
 }
