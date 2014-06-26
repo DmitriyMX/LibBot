@@ -23,9 +23,9 @@ public abstract class Bot {
 
 	public abstract void shutdownBot();
 
-	public abstract void onChat(Module module, ChatData data);
+	public abstract void onChat(String moduleId, Module module, ChatData data);
 
-	public abstract boolean onCommand(Module module, ChatData data);
+	public abstract boolean onCommand(String moduleId, Module module, ChatData data);
 
 	private final void run() {
 		while(this.running) {
@@ -51,7 +51,8 @@ public abstract class Bot {
 			}
 
 			this.newModules.clear();
-			for(Module module : this.modules.values()) {
+			for(String id : this.modules.keySet()) {
+				Module module = this.modules.get(id);
 				try {
 					module.update();
 					List<ChatData> chat = module.getIncomingChat();
@@ -60,7 +61,7 @@ public abstract class Bot {
 							System.out.println(module.getMessagePrefix() + " " + data.getUser() + ": " + data.getMessage());
 							if(data.getMessage().startsWith(this.commands.getPrefix())) {
 								if(this.acceptSelfCommands || !data.getUser().equals(module.getUsername())) {
-									if(this.onCommand(module, data)) {
+									if(this.onCommand(id, module, data)) {
 										try {
 											this.commands.execute(module, data);
 										} catch(Exception e) {
@@ -70,7 +71,7 @@ public abstract class Bot {
 									}
 								}
 							} else {
-								this.onChat(module, data);
+								this.onChat(id, module, data);
 							}
 						}
 					}
