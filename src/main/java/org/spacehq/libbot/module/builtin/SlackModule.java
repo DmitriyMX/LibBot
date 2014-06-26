@@ -105,13 +105,19 @@ public class SlackModule implements Module {
 		JsonArray messages = history.get("messages").getAsJsonArray();
 		for(int index = messages.size() - 1; index >= 0; index--) {
 			JsonObject message = messages.get(index).getAsJsonObject();
-			String user = message.has("user") ? message.get("user").getAsString() : message.get("username").getAsString();
-			double timestamp = message.get("ts").getAsDouble();
-			String text = HtmlEscaping.unescape(message.get("text").getAsString()).replaceAll("<@U(\\w+)\\|(\\w+)>", "$2");
-			if(message.get("type").getAsString().equals("message") && timestamp > this.lastReceived) {
-				this.incoming.add(new ChatData(this.users.containsKey(user) ? this.users.get(user) : user, text));
-				if(timestamp > latest) {
-					latest = timestamp;
+			if(message.has("message")) {
+				message = message.get("message").getAsJsonObject();
+			}
+
+			if(message.get("type").getAsString().equals("message")) {
+				String user = message.has("user") ? message.get("user").getAsString() : message.get("username").getAsString();
+				double timestamp = message.get("ts").getAsDouble();
+				String text = HtmlEscaping.unescape(message.get("text").getAsString()).replaceAll("<@U(\\w+)\\|(\\w+)>", "$2");
+				if(timestamp > this.lastReceived) {
+					this.incoming.add(new ChatData(this.users.containsKey(user) ? this.users.get(user) : user, text));
+					if(timestamp > latest) {
+						latest = timestamp;
+					}
 				}
 			}
 		}

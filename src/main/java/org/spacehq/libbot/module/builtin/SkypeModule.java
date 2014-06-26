@@ -15,6 +15,7 @@ public class SkypeModule implements Module {
 	private Chat chat;
 
 	private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
+	private List<String> idCache = new CopyOnWriteArrayList<String>();
 
 	public SkypeModule(String chat) {
 		this(chat, false);
@@ -55,20 +56,27 @@ public class SkypeModule implements Module {
 			Skype.addChatMessageListener(new ChatMessageListener() {
 				@Override
 				public void chatMessageReceived(ChatMessage chatMessage) throws SkypeException {
-					if(chatId.equals(chatMessage.getChat().getId()) && !chatMessage.getContent().trim().isEmpty()) {
-						incoming.add(new ChatData(chatMessage.getSender().getFullName(), chatMessage.getContent().trim()));
-					}
+					receive(chatMessage);
 				}
 
 				@Override
 				public void chatMessageSent(ChatMessage chatMessage) throws SkypeException {
-					if(chatId.equals(chatMessage.getChat().getId()) && !chatMessage.getContent().trim().isEmpty()) {
-						incoming.add(new ChatData(chatMessage.getSender().getFullName(), chatMessage.getContent().trim()));
-					}
+					receive(chatMessage);
 				}
 			});
 		} catch(SkypeException e) {
 			throw new ModuleException("Failed to connect Skype module.", e);
+		}
+	}
+
+	private void receive(ChatMessage chatMessage) throws SkypeException {
+		if(chatId.equals(chatMessage.getChat().getId()) && !idCache.contains(chatMessage.getId()) && !chatMessage.getContent().trim().isEmpty()) {
+			idCache.add(chatMessage.getId());
+			while(idCache.size() > 100) {
+				idCache.remove(idCache.size() - 1);
+			}
+
+			incoming.add(new ChatData(chatMessage.getSenderDisplayName(), chatMessage.getContent().trim()));
 		}
 	}
 
