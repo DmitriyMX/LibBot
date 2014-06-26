@@ -25,29 +25,29 @@ public class ExampleBot extends Bot {
 		this.getCommandManager().setParser(new SpacedCommandParser());
 		this.getCommandManager().register(new HelpCommand(10));
 		this.getCommandManager().register(new ExampleCommands());
-		this.addModule(new ConsoleModule(this));
+		this.addModule("Console", new ConsoleModule(this));
 		if(MINECRAFT) {
-			this.addModule(new MinecraftModule("localhost", 25565, "Username", "Password"));
+			this.addModule("Minecraft", new MinecraftModule("localhost", 25565, "Username", "Password"));
 		}
 
 		if(MINECRAFT_CLASSIC) {
-			this.addModule(new MinecraftClassicModule("Username", "Password", "Server URL"));
+			this.addModule("MinecraftClassic", new MinecraftClassicModule("Username", "Password", "Server URL"));
 		}
 
 		if(IRC) {
-			this.addModule(new IRCModule("ExampleBot", "localhost", "#channel"));
+			this.addModule("IRC", new IRCModule("ExampleBot", "localhost", "#channel"));
 		}
 
 		if(SKYPE) {
-			this.addModule(new SkypeModule("Skype chat title", true));
+			this.addModule("Skype", new SkypeModule("Skype chat title", true));
 		}
 
 		if(SLACK) {
-			this.addModule(new SlackModule("Token", "#channel", "Username"));
+			this.addModule("Slack", new SlackModule("Token", "#channel", "Username"));
 		}
 
 		if(HIP_CHAT) {
-			this.addModule(new HipChatModule("Token", "Room", "Username"));
+			this.addModule("HipChat", new HipChatModule("Token", "Room", "Username"));
 		}
 	}
 
