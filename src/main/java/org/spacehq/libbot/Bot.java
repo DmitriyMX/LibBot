@@ -4,6 +4,7 @@ import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.chat.cmd.CommandManager;
 import org.spacehq.libbot.module.Module;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,6 +44,8 @@ public abstract class Bot {
 	}
 
 	public abstract void initBot(String args[]);
+
+	public abstract void shutdownBot();
 
 	public abstract void onChat(Module module, ChatData data);
 
@@ -85,6 +88,7 @@ public abstract class Bot {
 
 	private final void shutdown() {
 		this.running = false;
+		this.shutdownBot();
 		for(Module module : this.modules.values()) {
 			System.out.println(module.getMessagePrefix() + " Disconnecting module...");
 			try {
@@ -119,12 +123,16 @@ public abstract class Bot {
 		return this.commands;
 	}
 
-	public final Module addModule(Module module) {
-		return this.modules.put(module.getClass(), module);
+	public final List<Module> getModules() {
+		return new ArrayList<Module>(this.modules.values());
 	}
 
 	public final Module getModule(Class<? extends Module> clazz) {
 		return this.modules.get(clazz);
+	}
+
+	public final Module addModule(Module module) {
+		return this.modules.put(module.getClass(), module);
 	}
 
 	public final Module removeModule(Class<? extends Module> clazz) {

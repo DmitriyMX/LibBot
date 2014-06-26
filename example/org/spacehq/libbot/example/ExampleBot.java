@@ -52,6 +52,10 @@ public class ExampleBot extends Bot {
 	}
 
 	@Override
+	public void shutdownBot() {
+	}
+
+	@Override
 	public void onChat(Module module, ChatData data) {
 	}
 
