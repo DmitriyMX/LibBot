@@ -46,6 +46,8 @@ public abstract class Bot {
 
 	public abstract void onChat(Module module, ChatData data);
 
+	public abstract boolean onCommand(Module module, ChatData data);
+
 	private final void run() {
 		while(this.running) {
 			for(Module module : this.modules.values()) {
@@ -57,11 +59,13 @@ public abstract class Bot {
 							System.out.println(module.getMessagePrefix() + " " + data.getUser() + ": " + data.getMessage());
 							if(data.getMessage().startsWith(this.commands.getPrefix())) {
 								if(this.acceptSelfCommands || !data.getUser().equals(module.getUsername())) {
-									try {
-										this.commands.execute(module, data);
-									} catch(Exception e) {
-										System.err.println(module.getMessagePrefix() + " An error occured while executing a command.");
-										e.printStackTrace();
+									if(this.onCommand(module, data)) {
+										try {
+											this.commands.execute(module, data);
+										} catch(Exception e) {
+											System.err.println(module.getMessagePrefix() + " An error occured while executing a command.");
+											e.printStackTrace();
+										}
 									}
 								}
 							} else {

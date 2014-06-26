@@ -54,4 +54,9 @@ public class ExampleBot extends Bot {
 	@Override
 	public void onChat(Module module, ChatData data) {
 	}
+
+	@Override
+	public boolean onCommand(Module module, ChatData data) {
+		return true;
+	}
 }
