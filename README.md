@@ -19,7 +19,8 @@ If you would like to see some examples, check out the source code in the example
 --------
 
 LibBot uses Maven to manage dependencies. Simply run 'mvn clean install' in the source's directory.
-You can also download a build <b>[here](http://build.spacehq.org/browse/LIBBOT-MAIN)</b>.
+Snapshots (if any exist) can be downloaded <b>[here](http://repo.spacehq.org/content/repositories/snapshots/org/spacehq/libbot)</b>.
+Releases (if any exist) can be downloaded <b>[here](http://repo.spacehq.org/content/repositories/release/org/spacehq/libbot)</b>.
 
 
 <b>License</b>
