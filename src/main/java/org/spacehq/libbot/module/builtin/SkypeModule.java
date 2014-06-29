@@ -18,6 +18,7 @@ public class SkypeModule implements Module {
 
 	private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
 	private List<String> idCache = new CopyOnWriteArrayList<String>();
+	private long startTime;
 
 	public SkypeModule(String chat) {
 		this(chat, false);
@@ -55,6 +56,7 @@ public class SkypeModule implements Module {
 				throw new ModuleException("Chat \"" + this.chatId + "\" does not exist.");
 			}
 
+			this.startTime = System.currentTimeMillis();
 			Skype.addChatMessageListener(new ChatMessageListener() {
 				@Override
 				public void chatMessageReceived(ChatMessage chatMessage) throws SkypeException {
@@ -72,7 +74,7 @@ public class SkypeModule implements Module {
 	}
 
 	private void receive(ChatMessage chatMessage) throws SkypeException {
-		if(chatId.equals(chatMessage.getChat().getId()) && !idCache.contains(chatMessage.getId()) && !chatMessage.getContent().trim().isEmpty()) {
+		if(chatMessage.getTime().getTime() < this.startTime && chatId.equals(chatMessage.getChat().getId()) && !idCache.contains(chatMessage.getId()) && !chatMessage.getContent().trim().isEmpty()) {
 			idCache.add(chatMessage.getId());
 			while(idCache.size() > 100) {
 				idCache.remove(idCache.size() - 1);
