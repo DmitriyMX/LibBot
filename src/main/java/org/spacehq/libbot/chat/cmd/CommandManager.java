@@ -17,6 +17,7 @@ public class CommandManager {
 	private Map<String, ExecutionInfo> commands = new HashMap<String, ExecutionInfo>();
 	private CommandParser parser = new SpacedCommandParser();
 	private PermissionManager permManager = new EmptyPermissionManager();
+	private boolean multiThreaded = false;
 	private String prefix = "#";
 	private String unknownCommandFormat = "Unknown command \"%1$s\", %2$s.";
 	private String noPermissionFormat = "You don't have permission to use \"%1$s\", %2$s.";
@@ -37,6 +38,14 @@ public class CommandManager {
 
 	public void setPermissionManager(PermissionManager manager) {
 		this.permManager = manager;
+	}
+
+	public boolean isMultiThreaded() {
+		return this.multiThreaded;
+	}
+
+	public void setMultiThreaded(boolean multiThreaded) {
+		this.multiThreaded = multiThreaded;
 	}
 
 	public String getPrefix() {
@@ -121,12 +130,12 @@ public class CommandManager {
 		return ret;
 	}
 
-	public void execute(Module source, ChatData message) {
+	public void execute(final Module source, final ChatData message) {
 		String msg = message.getMessage().substring(this.prefix.length());
-		String cmd = this.parser.getCommand(msg);
+		final String cmd = this.parser.getCommand(msg);
 		String prefixed = this.prefix + cmd;
-		String args[] = this.parser.getArguments(msg);
-		ExecutionInfo exec = this.commands.get(cmd);
+		final String args[] = this.parser.getArguments(msg);
+		final ExecutionInfo exec = this.commands.get(cmd);
 		if(exec == null) {
 			if(this.unknownCommandFormat != null) {
 				source.chat(String.format(this.unknownCommandFormat, prefixed, message.getUser()));
@@ -156,7 +165,18 @@ public class CommandManager {
 			return;
 		}
 
-		exec.execute(source, this, message.getUser(), cmd, args);
+		Runnable runnable = new Runnable() {
+			@Override
+			public void run() {
+				exec.execute(source, CommandManager.this, message.getUser(), cmd, args);
+			}
+		};
+
+		if(this.multiThreaded) {
+			new Thread(runnable).start();
+		} else {
+			runnable.run();
+		}
 	}
 
 	private static class ExecutionInfo {
