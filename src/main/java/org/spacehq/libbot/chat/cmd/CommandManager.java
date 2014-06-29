@@ -154,12 +154,18 @@ public class CommandManager {
 		}
 
 		if(args.length < command.min() || (command.max() != -1 && args.length > command.max())) {
+			StringBuilder build = new StringBuilder();
 			if(this.incorrectUsageFormat != null) {
-				source.chat(String.format(this.incorrectUsageFormat, prefixed, message.getUser()));
+				build.append(String.format(this.incorrectUsageFormat, prefixed, message.getUser())).append("\n");
 			}
 
 			if(this.usageFormat != null) {
-				source.chat(String.format(this.usageFormat, prefixed + " " + command.usage()));
+				build.append(String.format(this.usageFormat, prefixed + " " + command.usage())).append("\n");
+			}
+
+			String out = build.toString().trim();
+			if(!out.isEmpty()) {
+				source.chat(out);
 			}
 
 			return;
