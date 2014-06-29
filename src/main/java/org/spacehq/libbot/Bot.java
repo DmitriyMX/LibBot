@@ -80,6 +80,11 @@ public abstract class Bot {
 					e.printStackTrace();
 				}
 			}
+
+			try {
+				Thread.sleep(50);
+			} catch(InterruptedException e) {
+			}
 		}
 
 		this.shutdown();

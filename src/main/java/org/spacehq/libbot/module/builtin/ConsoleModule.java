@@ -78,6 +78,11 @@ public class ConsoleModule implements Module {
 						} else {
 							incoming.add(new ChatData("Console", bot.getCommandManager().getPrefix() + line));
 						}
+					} else {
+						try {
+							Thread.sleep(100);
+						} catch(InterruptedException e) {
+						}
 					}
 				} catch(IOException e) {
 					System.err.println("Failed to read line from console!");
