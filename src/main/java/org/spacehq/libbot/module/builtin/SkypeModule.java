@@ -74,7 +74,7 @@ public class SkypeModule implements Module {
 	}
 
 	private void receive(ChatMessage chatMessage) throws SkypeException {
-		if(chatMessage.getTime().getTime() < this.startTime && chatId.equals(chatMessage.getChat().getId()) && !idCache.contains(chatMessage.getId()) && !chatMessage.getContent().trim().isEmpty()) {
+		if(chatMessage.getTime().getTime() > this.startTime && chatId.equals(chatMessage.getChat().getId()) && !idCache.contains(chatMessage.getId()) && !chatMessage.getContent().trim().isEmpty()) {
 			idCache.add(chatMessage.getId());
 			while(idCache.size() > 100) {
 				idCache.remove(idCache.size() - 1);
