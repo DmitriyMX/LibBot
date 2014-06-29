@@ -6,7 +6,9 @@ import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.module.ModuleException;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SkypeModule implements Module {
@@ -136,6 +138,23 @@ public class SkypeModule implements Module {
 	public void update() {
 	}
 
+	public static Map<String, String> getChats() {
+		Map<String, String> ret = new HashMap<String, String>();
+		try {
+			if(!Skype.isRunning()) {
+				return ret;
+			}
+
+			for(Chat chat : Skype.getAllChats()) {
+				ret.put(chat.getId(), chat.getWindowTitle());
+			}
+		} catch(SkypeException e) {
+			throw new ModuleException("Failed to get chats.", e);
+		}
+
+		return ret;
+	}
+
 	private static String getChatId(String chatName) {
 		try {
 			for(Chat chat : Skype.getAllChats()) {
@@ -144,8 +163,7 @@ public class SkypeModule implements Module {
 				}
 			}
 		} catch(SkypeException e) {
-			System.err.println("Failed to get chat ID for chat \"" + chatName + "\".");
-			e.printStackTrace();
+			throw new ModuleException("Failed to get chat ID for chat \"" + chatName + "\".", e);
 		}
 
 		return "";
