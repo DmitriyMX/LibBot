@@ -132,7 +132,7 @@ public class CommandManager {
 
 	public void execute(final Module source, final ChatData message) {
 		String msg = message.getMessage().substring(this.prefix.length());
-		final String cmd = this.parser.getCommand(msg);
+		final String cmd = this.parser.getCommand(msg).toLowerCase();
 		String prefixed = this.prefix + cmd;
 		final String args[] = this.parser.getArguments(msg);
 		final ExecutionInfo exec = this.commands.get(cmd);
