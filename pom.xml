@@ -78,9 +78,9 @@
             <version>1.5.0</version>
         </dependency>
         <dependency>
-            <groupId>com.skype</groupId>
-            <artifactId>skype4java</artifactId>
-            <version>1.4</version>
+            <groupId>com.github.taksan</groupId>
+            <artifactId>skype-java-api</artifactId>
+            <version>1.6-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>

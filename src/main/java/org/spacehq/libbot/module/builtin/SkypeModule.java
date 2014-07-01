@@ -17,7 +17,6 @@ public class SkypeModule implements Module {
 	private Chat chat;
 
 	private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
-	private List<String> idCache = new CopyOnWriteArrayList<String>();
 	private long startTime;
 
 	public SkypeModule(String chat) {
@@ -74,13 +73,8 @@ public class SkypeModule implements Module {
 	}
 
 	private void receive(ChatMessage chatMessage) throws SkypeException {
-		if(chatMessage.getTime().getTime() > this.startTime && chatId.equals(chatMessage.getChat().getId()) && !idCache.contains(chatMessage.getId()) && !chatMessage.getContent().trim().isEmpty()) {
-			idCache.add(chatMessage.getId());
-			while(idCache.size() > 100) {
-				idCache.remove(idCache.size() - 1);
-			}
-
-			incoming.add(new ChatData(chatMessage.getSenderDisplayName(), chatMessage.getContent().trim()));
+		if(this.chatId.equals(chatMessage.getChat().getId()) && chatMessage.getTime().getTime() > this.startTime) {
+			this.incoming.add(new ChatData(chatMessage.getSenderDisplayName(), chatMessage.getContent().trim()));
 		}
 	}
 
