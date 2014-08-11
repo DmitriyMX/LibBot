@@ -21,6 +21,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MinecraftClassicModule implements Module {
+	private static final Pattern COLOR_PATTERN = Pattern.compile("(?i)&[0-9A-FK-OR]");
+
 	private String username;
 	private String password;
 	private String serverUrl;
@@ -33,8 +35,8 @@ public class MinecraftClassicModule implements Module {
 	private List<Pattern> chatPatterns = new ArrayList<Pattern>();
 
 	private MinecraftClassicModule() {
-		this.addChatPattern("\\<[A-Za-z0-9_-]+\\> (.*)");
-		this.addChatPattern("\\[[A-Za-z0-9_-]+\\] (.*)");
+		this.addChatPattern("\\<([A-Za-z0-9_-]+)\\> (.*)");
+		this.addChatPattern("\\[([A-Za-z0-9_-]+)\\] (.*)");
 	}
 
 	public MinecraftClassicModule(String username, String password, String serverUrl) {
@@ -176,7 +178,7 @@ public class MinecraftClassicModule implements Module {
 		}
 
 		private void parseChat(String message) {
-			String text = message.replaceAll("&[0-9a-z]", "");
+			String text = COLOR_PATTERN.matcher(message).replaceAll("");
 			String user = null;
 			String msg = null;
 			for(Pattern pattern : chatPatterns) {

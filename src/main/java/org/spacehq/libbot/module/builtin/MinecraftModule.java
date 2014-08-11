@@ -22,6 +22,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class MinecraftModule implements Module {
+	private static final Pattern COLOR_PATTERN = Pattern.compile("(?i)§[0-9A-FK-OR]");
+
 	private String host;
 	private int port;
 	private String username;
@@ -36,8 +38,8 @@ public class MinecraftModule implements Module {
 		this.port = port;
 		this.username = username;
 		this.password = password;
-		this.addChatPattern("\\<[A-Za-z0-9_-]+\\> (.*)");
-		this.addChatPattern("\\[[A-Za-z0-9_-]+\\] (.*)");
+		this.addChatPattern("\\<([A-Za-z0-9_-]+)\\> (.*)");
+		this.addChatPattern("\\[([A-Za-z0-9_-]+)\\] (.*)");
 	}
 
 	public List<Pattern> getChatPatterns() {
@@ -122,7 +124,14 @@ public class MinecraftModule implements Module {
 
 	@Override
 	public void chat(String message) {
+		List<String> send = new ArrayList<String>();
 		for(String msg : message.split("\n")) {
+			for(int i = 0; i < msg.length(); i += 100) {
+				send.add(msg.substring(i, Math.min(i + 100, msg.length())));
+			}
+		}
+
+		for(String msg : send) {
 			this.conn.getSession().send(new ClientChatPacket(msg));
 		}
 	}
@@ -148,7 +157,7 @@ public class MinecraftModule implements Module {
 			String user = null;
 			String msg = null;
 			if(message instanceof TextMessage) {
-				String text = message.getText().replaceAll("§[0-9a-z]", "");
+				String text = COLOR_PATTERN.matcher(message.getFullText()).replaceAll("");
 				for(Pattern pattern : chatPatterns) {
 					Matcher matcher = pattern.matcher(text);
 					if(matcher.matches()) {
@@ -159,9 +168,9 @@ public class MinecraftModule implements Module {
 				}
 			} else {
 				TranslationMessage trans = (TranslationMessage) message;
-				if(trans.getTranslationKey().equals("chat.type.text")) {
-					user = trans.getTranslationParams()[0].getFullText().replaceAll("§[0-9a-z]", "");
-					msg = trans.getTranslationParams()[1].getFullText().replaceAll("§[0-9a-z]", "");
+				if(trans.getTranslationKey().equals("chat.type.text") || trans.getTranslationKey().equals("chat.type.announcement")) {
+					user = COLOR_PATTERN.matcher(trans.getTranslationParams()[0].getFullText()).replaceAll("");
+					msg = COLOR_PATTERN.matcher(trans.getTranslationParams()[1].getFullText()).replaceAll("");
 				}
 			}
 
