@@ -37,6 +37,7 @@ public class MinecraftModule implements Module {
 		this.username = username;
 		this.password = password;
 		this.addChatPattern("\\<[A-Za-z0-9_-]+\\> (.*)");
+		this.addChatPattern("\\[[A-Za-z0-9_-]+\\] (.*)");
 	}
 
 	public List<Pattern> getChatPatterns() {

@@ -32,19 +32,24 @@ public class MinecraftClassicModule implements Module {
 	private List<ChatData> incoming = new ArrayList<ChatData>();
 	private List<Pattern> chatPatterns = new ArrayList<Pattern>();
 
+	private MinecraftClassicModule() {
+		this.addChatPattern("\\<[A-Za-z0-9_-]+\\> (.*)");
+		this.addChatPattern("\\[[A-Za-z0-9_-]+\\] (.*)");
+	}
+
 	public MinecraftClassicModule(String username, String password, String serverUrl) {
+		this();
 		this.username = username;
 		this.password = password;
 		this.serverUrl = serverUrl;
-		this.addChatPattern("\\<[A-Za-z0-9_-]+\\> (.*)");
 	}
 
 	public MinecraftClassicModule(String username, String verificationKey, String host, int port) {
+		this();
 		this.username = username;
 		this.verificationKey = verificationKey;
 		this.host = host;
 		this.port = port;
-		this.addChatPattern("\\<[A-Za-z0-9_-]+\\> (.*)");
 	}
 
 	public List<Pattern> getChatPatterns() {
