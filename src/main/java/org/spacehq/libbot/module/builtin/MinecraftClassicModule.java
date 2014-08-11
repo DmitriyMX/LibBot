@@ -17,6 +17,8 @@ import org.spacehq.packetlib.tcp.TcpSessionFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MinecraftClassicModule implements Module {
 	private String username;
@@ -28,11 +30,13 @@ public class MinecraftClassicModule implements Module {
 
 	private Client conn;
 	private List<ChatData> incoming = new ArrayList<ChatData>();
+	private List<Pattern> chatPatterns = new ArrayList<Pattern>();
 
 	public MinecraftClassicModule(String username, String password, String serverUrl) {
 		this.username = username;
 		this.password = password;
 		this.serverUrl = serverUrl;
+		this.addChatPattern("\\<[A-Za-z0-9_-]+\\> (.*)");
 	}
 
 	public MinecraftClassicModule(String username, String verificationKey, String host, int port) {
@@ -40,6 +44,42 @@ public class MinecraftClassicModule implements Module {
 		this.verificationKey = verificationKey;
 		this.host = host;
 		this.port = port;
+		this.addChatPattern("\\<[A-Za-z0-9_-]+\\> (.*)");
+	}
+
+	public List<Pattern> getChatPatterns() {
+		return new ArrayList<Pattern>(this.chatPatterns);
+	}
+
+	public MinecraftClassicModule addChatPattern(String pattern) {
+		this.addChatPattern(Pattern.compile(pattern));
+		return this;
+	}
+
+	public MinecraftClassicModule addChatPattern(Pattern pattern) {
+		this.chatPatterns.add(pattern);
+		return this;
+	}
+
+	public MinecraftClassicModule removeChatPattern(String pattern) {
+		Pattern remove = null;
+		for(Pattern p : this.chatPatterns) {
+			if(p.toString().equals(pattern)) {
+				remove = p;
+				break;
+			}
+		}
+
+		if(remove != null) {
+			this.removeChatPattern(remove);
+		}
+
+		return this;
+	}
+
+	public MinecraftClassicModule removeChatPattern(Pattern pattern) {
+		this.chatPatterns.remove(pattern);
+		return this;
 	}
 
 	@Override
@@ -131,17 +171,21 @@ public class MinecraftClassicModule implements Module {
 		}
 
 		private void parseChat(String message) {
-			// Try to parse common chat formatting
 			String text = message.replaceAll("&[0-9a-z]", "");
-			int start = text.startsWith("[") ? text.indexOf("]") + 1 : 0;
-			String user = text.substring(start, text.indexOf(' ', start)).trim();
-			String msg = text.substring(text.indexOf(' ', start)).trim();
-			user = user.replace("<", "").replace(">", "").replace(" [g]: ", "");
-			if(msg.startsWith(": ")) {
-				msg = msg.replaceFirst(": ", "");
+			String user = null;
+			String msg = null;
+			for(Pattern pattern : chatPatterns) {
+				Matcher matcher = pattern.matcher(text);
+				if(matcher.matches()) {
+					user = matcher.group(1);
+					msg = matcher.group(2);
+					break;
+				}
 			}
 
-			incoming.add(new ChatData(user, msg));
+			if(user != null && msg != null) {
+				incoming.add(new ChatData(user, msg));
+			}
 		}
 	}
 }

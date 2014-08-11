@@ -18,6 +18,8 @@ import org.spacehq.packetlib.tcp.TcpSessionFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class MinecraftModule implements Module {
 	private String host;
@@ -27,12 +29,49 @@ public class MinecraftModule implements Module {
 
 	private Client conn;
 	private List<ChatData> incoming = new ArrayList<ChatData>();
+	private List<Pattern> chatPatterns = new ArrayList<Pattern>();
 
 	public MinecraftModule(String host, int port, String username, String password) {
 		this.host = host;
 		this.port = port;
 		this.username = username;
 		this.password = password;
+		this.addChatPattern("\\<[A-Za-z0-9_-]+\\> (.*)");
+	}
+
+	public List<Pattern> getChatPatterns() {
+		return new ArrayList<Pattern>(this.chatPatterns);
+	}
+
+	public MinecraftModule addChatPattern(String pattern) {
+		this.addChatPattern(Pattern.compile(pattern));
+		return this;
+	}
+
+	public MinecraftModule addChatPattern(Pattern pattern) {
+		this.chatPatterns.add(pattern);
+		return this;
+	}
+
+	public MinecraftModule removeChatPattern(String pattern) {
+		Pattern remove = null;
+		for(Pattern p : this.chatPatterns) {
+			if(p.toString().equals(pattern)) {
+				remove = p;
+				break;
+			}
+		}
+
+		if(remove != null) {
+			this.removeChatPattern(remove);
+		}
+
+		return this;
+	}
+
+	public MinecraftModule removeChatPattern(Pattern pattern) {
+		this.chatPatterns.remove(pattern);
+		return this;
 	}
 
 	@Override
@@ -108,19 +147,20 @@ public class MinecraftModule implements Module {
 			String user = null;
 			String msg = null;
 			if(message instanceof TextMessage) {
-				String text = message.getText();
-				user = text.replaceAll("§[0-9a-z]", "").substring(0, text.indexOf(' '));
-				msg = text.replaceAll("§[0-9a-z]", "").substring(text.indexOf(' '));
-				// Parse common chat formatting
-				user = user.replace("<", "").replace(">", "").replace(" [g]: ", "");
-				if(msg.startsWith(": ")) {
-					msg = msg.replaceFirst(": ", "");
+				String text = message.getText().replaceAll("§[0-9a-z]", "");
+				for(Pattern pattern : chatPatterns) {
+					Matcher matcher = pattern.matcher(text);
+					if(matcher.matches()) {
+						user = matcher.group(1);
+						msg = matcher.group(2);
+						break;
+					}
 				}
 			} else {
 				TranslationMessage trans = (TranslationMessage) message;
 				if(trans.getTranslationKey().equals("chat.type.text")) {
-					user = trans.getTranslationParams()[0].getFullText();
-					msg = trans.getTranslationParams()[1].getFullText();
+					user = trans.getTranslationParams()[0].getFullText().replaceAll("§[0-9a-z]", "");
+					msg = trans.getTranslationParams()[1].getFullText().replaceAll("§[0-9a-z]", "");
 				}
 			}
 
