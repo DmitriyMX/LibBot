@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class CommandManager {
 	private Map<String, ExecutionInfo> commands = new HashMap<String, ExecutionInfo>();
@@ -23,6 +25,8 @@ public class CommandManager {
 	private String noPermissionFormat = "You don't have permission to use \"%1$s\", %2$s.";
 	private String incorrectUsageFormat = "Incorrect usage of \"%1$s\", %2$s.";
 	private String usageFormat = "Usage: %1$s";
+
+	private static final Pattern EXEC_PATTERN = Pattern.compile("\\!exec\\{([^}]+)\\}");
 
 	public CommandParser getParser() {
 		return this.parser;
@@ -131,10 +135,24 @@ public class CommandManager {
 	}
 
 	public void execute(final Module source, final ChatData message) {
+		this.execute(source, message, false);
+	}
+
+	private void execute(final Module source, final ChatData message, boolean ignoreThreading) {
 		String msg = message.getMessage().substring(this.prefix.length());
 		final String cmd = this.parser.getCommand(msg).toLowerCase();
 		String prefixed = this.prefix + cmd;
-		final String args[] = this.parser.getArguments(msg);
+		String joined = join(this.parser.getArguments(msg));
+		if(!joined.isEmpty()) {
+			Matcher matcher = EXEC_PATTERN.matcher(joined);
+			while(matcher.find()) {
+				ArgsExecutor exec = new ArgsExecutor(source.getUsername());
+				this.execute(exec, new ChatData(source.getUsername(), matcher.group(1)), true);
+				joined = joined.replaceFirst(Pattern.quote(matcher.group(0)), exec.getResult());
+			}
+		}
+
+		final String args[] = !joined.isEmpty() ? joined.split(" ") : new String[0];
 		final ExecutionInfo exec = this.commands.get(cmd);
 		if(exec == null) {
 			if(this.unknownCommandFormat != null) {
@@ -178,11 +196,26 @@ public class CommandManager {
 			}
 		};
 
-		if(this.multiThreaded) {
+		if(this.multiThreaded && !ignoreThreading) {
 			new Thread(runnable).start();
 		} else {
 			runnable.run();
 		}
+	}
+
+	private static String join(String strs[]) {
+		StringBuilder build = new StringBuilder();
+		boolean first = true;
+		for(String str : strs) {
+			if(!first) {
+				build.append(" ");
+			}
+
+			first = false;
+			build.append(str);
+		}
+
+		return build.toString();
 	}
 
 	private static class ExecutionInfo {
