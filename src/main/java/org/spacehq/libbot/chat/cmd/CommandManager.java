@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class CommandManager {
 	private Map<String, ExecutionInfo> commands = new HashMap<String, ExecutionInfo>();
@@ -25,8 +23,6 @@ public class CommandManager {
 	private String noPermissionFormat = "You don't have permission to use \"%1$s\", %2$s.";
 	private String incorrectUsageFormat = "Incorrect usage of \"%1$s\", %2$s.";
 	private String usageFormat = "Usage: %1$s";
-
-	private static final Pattern EXEC_PATTERN = Pattern.compile("\\!exec\\{([^}]+)\\}");
 
 	public CommandParser getParser() {
 		return this.parser;
@@ -142,17 +138,7 @@ public class CommandManager {
 		String msg = message.getMessage().substring(this.prefix.length());
 		final String cmd = this.parser.getCommand(msg).toLowerCase();
 		String prefixed = this.prefix + cmd;
-		String joined = join(this.parser.getArguments(msg));
-		if(!joined.isEmpty()) {
-			Matcher matcher = EXEC_PATTERN.matcher(joined);
-			while(matcher.find()) {
-				ArgsExecutor exec = new ArgsExecutor(source.getUsername());
-				this.execute(exec, new ChatData(source.getUsername(), matcher.group(1)), true);
-				joined = joined.replaceFirst(Pattern.quote(matcher.group(0)), exec.getResult());
-			}
-		}
-
-		final String args[] = !joined.isEmpty() ? joined.split(" ") : new String[0];
+		final String args[] = this.parseArgs(source, join(this.parser.getArguments(msg)));
 		final ExecutionInfo exec = this.commands.get(cmd);
 		if(exec == null) {
 			if(this.unknownCommandFormat != null) {
@@ -201,6 +187,46 @@ public class CommandManager {
 		} else {
 			runnable.run();
 		}
+	}
+
+	private String[] parseArgs(Module source, String str) {
+		int execStart = -1;
+		int execCount = 0;
+		int argStart = -1;
+		List<String> args = new ArrayList<String>();
+		for(int index = 0; index < str.length(); index++) {
+			char c = str.charAt(index);
+			if(str.indexOf("!exec{", index) == index) {
+				if(execStart == -1) {
+					execStart = index + "!exec{".length();
+				}
+
+				execCount++;
+			} else if(execStart != -1) {
+				if(c == '}' && str.charAt(index - 1) != '\\') {
+					execCount--;
+					if(execCount == 0) {
+						ArgsExecutor exec = new ArgsExecutor(source.getUsername());
+						String cmd = str.substring(execStart, index);
+						this.execute(exec, new ChatData(source.getUsername(), cmd), true);
+						args.add(exec.getResult());
+						execStart = -1;
+					}
+				}
+			} else if(argStart == -1 && c != ' ') {
+				argStart = index;
+			} else if(argStart != -1 && (c == ' ' || index == str.length() - 1)) {
+				int end = index;
+				if(c != ' ') {
+					end++;
+				}
+
+				args.add(str.substring(argStart, end));
+				argStart = -1;
+			}
+		}
+
+		return args.toArray(new String[args.size()]);
 	}
 
 	private static String join(String strs[]) {
