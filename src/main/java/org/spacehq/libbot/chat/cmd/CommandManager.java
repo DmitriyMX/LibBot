@@ -213,16 +213,20 @@ public class CommandManager {
 						execStart = -1;
 					}
 				}
-			} else if(argStart == -1 && c != ' ') {
-				argStart = index;
-			} else if(argStart != -1 && (c == ' ' || index == str.length() - 1)) {
-				int end = index;
-				if(c != ' ') {
-					end++;
+			} else {
+				if(argStart == -1 && c != ' ') {
+					argStart = index;
 				}
 
-				args.add(str.substring(argStart, end));
-				argStart = -1;
+				if(argStart != -1 && (c == ' ' || index == str.length() - 1)) {
+					int end = index;
+					if(c != ' ') {
+						end++;
+					}
+
+					args.add(str.substring(argStart, end));
+					argStart = -1;
+				}
 			}
 		}
 
