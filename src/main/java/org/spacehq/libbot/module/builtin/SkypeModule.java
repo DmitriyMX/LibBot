@@ -53,7 +53,9 @@ public class SkypeModule implements Module {
 		this.chat = null;
 
 		try {
-			this.skype = Skype.login(username, password);
+			this.skype = Skype.login(this.username, this.password);
+			this.skype.subscribe();
+
 			this.chat = this.skype.getChat(this.chatId);
 			if(this.chat == null) {
 				throw new ModuleException("Chat \"" + this.chatId + "\" does not exist.");
@@ -62,23 +64,25 @@ public class SkypeModule implements Module {
 			this.startTime = System.currentTimeMillis();
 			this.skype.getEventDispatcher().registerListener(new Listener() {
 				@EventHandler
-				public void onMessageReceived(MessageReceivedEvent e) throws SkypeException {
+				public void onMessageReceived(MessageReceivedEvent e) {
 					receive(e.getMessage());
 				}
 
 				@EventHandler
-				public void onMessageEdited(MessageEditedEvent e) throws SkypeException {
+				public void onMessageEdited(MessageEditedEvent e) {
 					receive(e.getMessage());
 				}
 			});
+		} catch(ModuleException e) {
+			throw e;
 		} catch(Exception e) {
 			throw new ModuleException("Failed to connect Skype module.", e);
 		}
 	}
 
-	private void receive(ChatMessage chatMessage) throws SkypeException {
-		if(this.chatId.equals(chatMessage.getChat().getIdentity()) && chatMessage.getTime() > this.startTime) {
-			this.incoming.add(new ChatData(chatMessage.getSender().getDisplayName(), chatMessage.getMessage().asPlaintext().trim()));
+	private void receive(ChatMessage chatMessage) {
+		if(this.chat.getIdentity().equals(chatMessage.getChat().getIdentity()) && chatMessage.getTime() > this.startTime) {
+			this.incoming.add(new ChatData(chatMessage.getSender().getDisplayName() != null ? chatMessage.getSender().getDisplayName() : chatMessage.getSender().getUsername(), chatMessage.getMessage().asPlaintext().trim()));
 		}
 	}
 
