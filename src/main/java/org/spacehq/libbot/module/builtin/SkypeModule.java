@@ -7,7 +7,6 @@ import com.samczsun.skype4j.events.EventHandler;
 import com.samczsun.skype4j.events.Listener;
 import com.samczsun.skype4j.events.chat.message.MessageEditedEvent;
 import com.samczsun.skype4j.events.chat.message.MessageReceivedEvent;
-import com.samczsun.skype4j.exceptions.SkypeException;
 import com.samczsun.skype4j.formatting.Message;
 import com.samczsun.skype4j.formatting.Text;
 import org.spacehq.libbot.chat.ChatData;
@@ -133,7 +132,10 @@ public class SkypeModule implements Module {
 	public void chat(String message) {
 		if(this.skype != null && this.chat != null) {
 			try {
+				IllegalArgumentException e;
 				receive(this.chat.sendMessage(Message.create().with(Text.plain(message))));
+			} catch(IllegalArgumentException e) {
+				// TODO: Stop this from happening ("User must not be null" internally). Until then, swallow these exceptions.
 			} catch(Exception e) {
 				throw new ModuleException("Failed to send chat message.", e);
 			}
