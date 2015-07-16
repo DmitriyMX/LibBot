@@ -3,6 +3,7 @@ package org.spacehq.libbot.module.builtin;
 import com.samczsun.skype4j.Skype;
 import com.samczsun.skype4j.chat.Chat;
 import com.samczsun.skype4j.chat.ChatMessage;
+import com.samczsun.skype4j.events.EventHandler;
 import com.samczsun.skype4j.events.Listener;
 import com.samczsun.skype4j.events.chat.message.MessageEditedEvent;
 import com.samczsun.skype4j.events.chat.message.MessageReceivedEvent;
@@ -60,10 +61,12 @@ public class SkypeModule implements Module {
 
 			this.startTime = System.currentTimeMillis();
 			this.skype.getEventDispatcher().registerListener(new Listener() {
+				@EventHandler
 				public void onMessageReceived(MessageReceivedEvent e) throws SkypeException {
 					receive(e.getMessage());
 				}
 
+				@EventHandler
 				public void onMessageEdited(MessageEditedEvent e) throws SkypeException {
 					receive(e.getMessage());
 				}
