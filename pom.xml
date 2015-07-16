@@ -54,6 +54,10 @@
             <id>spacehq-snapshots</id>
             <url>http://repo.spacehq.org/content/repositories/snapshots/</url>
         </repository>
+        <repository>
+            <id>samczsun-repo</id>
+            <url>http://r.zk.ms/content/repositories/snapshots</url>
+        </repository>
     </repositories>
 
     <properties>
@@ -78,14 +82,14 @@
             <version>1.5.0</version>
         </dependency>
         <dependency>
-            <groupId>com.github.taksan</groupId>
-            <artifactId>skype-java-api</artifactId>
-            <version>1.6-SNAPSHOT</version>
+            <groupId>com.samczsun</groupId>
+            <artifactId>skype4j</artifactId>
+            <version>0.0.7-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
-            <version>2.2.4</version>
+            <version>2.3.1</version>
         </dependency>
     </dependencies>
 

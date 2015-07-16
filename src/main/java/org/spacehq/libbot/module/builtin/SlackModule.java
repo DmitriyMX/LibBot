@@ -30,6 +30,18 @@ public class SlackModule implements Module {
 	private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
 
 	public SlackModule(String token, String channel, String username) {
+		if(token == null || token.isEmpty()) {
+			throw new IllegalArgumentException("Token cannot be null or empty.");
+		}
+
+		if(channel == null || channel.isEmpty()) {
+			throw new IllegalArgumentException("Channel cannot be null or empty.");
+		}
+
+		if(username == null || username.isEmpty()) {
+			throw new IllegalArgumentException("Username cannot be null or empty.");
+		}
+
 		this.token = token;
 		this.channel = channel;
 		this.username = username;
@@ -61,12 +73,16 @@ public class SlackModule implements Module {
 
 	@Override
 	public void setUsername(String name) {
+		if(name == null || name.isEmpty()) {
+			throw new IllegalArgumentException("Username cannot be null or empty.");
+		}
+
 		this.username = name;
 	}
 
 	@Override
 	public String getMessagePrefix() {
-		return "[Slack]";
+		return "[Slack - " + this.getUsername() + "]";
 	}
 
 	@Override

@@ -16,6 +16,10 @@ public class ConsoleModule implements Module {
 	private Bot bot;
 
 	public ConsoleModule(Bot bot) {
+		if(bot == null) {
+			throw new IllegalArgumentException("Bot cannot be null.");
+		}
+
 		this.bot = bot;
 	}
 
@@ -31,16 +35,17 @@ public class ConsoleModule implements Module {
 
 	@Override
 	public String getUsername() {
-		return "ConsoleListener";
+		return "Console";
 	}
 
 	@Override
 	public void setUsername(String name) {
+		throw new UnsupportedOperationException("ConsoleModule does not have a username.");
 	}
 
 	@Override
 	public String getMessagePrefix() {
-		return "[Console]";
+		return "[" + this.getUsername() + "]";
 	}
 
 	@Override

@@ -11,7 +11,6 @@ public abstract class Bot {
 	private boolean acceptSelfCommands;
 	private final CommandManager commands = new CommandManager();
 	private final Map<String, Module> modules = new LinkedHashMap<String, Module>();
-	private final Map<String, Module> newModules = new LinkedHashMap<String, Module>();
 
 	public final void start(String args[], boolean acceptSelfCommands) {
 		this.acceptSelfCommands = acceptSelfCommands;
@@ -29,28 +28,6 @@ public abstract class Bot {
 
 	private final void run() {
 		while(this.running) {
-			for(String id : this.newModules.keySet()) {
-				Module module = this.newModules.get(id);
-				if(this.modules.containsKey(id)) {
-					this.removeModule(id);
-				}
-
-				System.out.println(module.getMessagePrefix() + " Connecting module...");
-				if(module.getUsername() == null || module.getUsername().isEmpty()) {
-					module.setUsername("Bot");
-				}
-
-				try {
-					module.connect();
-					this.modules.put(id, module);
-					System.out.println(module.getMessagePrefix() + " Module connected.");
-				} catch(Exception e) {
-					System.err.println(module.getMessagePrefix() + " An error occured while connecting the module.");
-					e.printStackTrace();
-				}
-			}
-
-			this.newModules.clear();
 			for(String id : this.modules.keySet()) {
 				Module module = this.modules.get(id);
 				try {
@@ -129,8 +106,23 @@ public abstract class Bot {
 	}
 
 	public final Module addModule(String id, Module module) {
-		this.newModules.put(id, module);
-		return module;
+		if(this.modules.containsKey(id)) {
+			this.removeModule(id);
+		}
+
+		try {
+			System.out.println(module.getMessagePrefix() + " Connecting module...");
+			module.connect();
+			this.modules.put(id, module);
+			System.out.println(module.getMessagePrefix() + " Module connected.");
+
+			return module;
+		} catch(Exception e) {
+			System.err.println(module.getMessagePrefix() + " An error occured while connecting the module.");
+			e.printStackTrace();
+
+			return null;
+		}
 	}
 
 	public final Module removeModule(String id) {

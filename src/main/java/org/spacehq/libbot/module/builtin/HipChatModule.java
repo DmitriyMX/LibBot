@@ -32,6 +32,18 @@ public class HipChatModule implements Module {
 	private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
 
 	public HipChatModule(String token, String room, String username) {
+		if(token == null || token.isEmpty()) {
+			throw new IllegalArgumentException("Token cannot be null or empty.");
+		}
+
+		if(room == null || room.isEmpty()) {
+			throw new IllegalArgumentException("Room cannot be null or empty.");
+		}
+
+		if(username == null || username.isEmpty()) {
+			throw new IllegalArgumentException("Username cannot be null or empty.");
+		}
+
 		this.token = token;
 		this.room = room;
 		this.username = username;
@@ -73,12 +85,16 @@ public class HipChatModule implements Module {
 
 	@Override
 	public void setUsername(String name) {
+		if(name == null || name.isEmpty()) {
+			throw new IllegalArgumentException("Username cannot be null or empty.");
+		}
+
 		this.username = name;
 	}
 
 	@Override
 	public String getMessagePrefix() {
-		return "[HipChat]";
+		return "[HipChat - " + this.getUsername() + "]";
 	}
 
 	@Override

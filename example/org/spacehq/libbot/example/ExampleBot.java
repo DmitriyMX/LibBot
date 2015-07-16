@@ -39,7 +39,7 @@ public class ExampleBot extends Bot {
 		}
 
 		if(SKYPE) {
-			this.addModule("Skype", new SkypeModule("Skype chat title", true));
+			this.addModule("Skype", new SkypeModule("Username", "Password", "Skype chat ID"));
 		}
 
 		if(SLACK) {

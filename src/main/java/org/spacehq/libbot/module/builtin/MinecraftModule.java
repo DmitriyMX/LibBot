@@ -36,10 +36,23 @@ public class MinecraftModule implements Module {
 	private List<Pattern> chatPatterns = new ArrayList<Pattern>();
 
 	public MinecraftModule(String host, int port, String username, String password) {
+		if(host == null || host.isEmpty()) {
+			throw new IllegalArgumentException("Host cannot be null or empty.");
+		}
+
+		if(username == null || username.isEmpty()) {
+			throw new IllegalArgumentException("Username cannot be null or empty.");
+		}
+
+		if(password == null || password.isEmpty()) {
+			throw new IllegalArgumentException("Password cannot be null or empty.");
+		}
+
 		this.host = host;
 		this.port = port;
 		this.username = username;
 		this.password = password;
+
 		this.addChatPattern("\\<([A-Za-z0-9_-]+)\\> (.*)");
 		this.addChatPattern("\\[([A-Za-z0-9_-]+)\\] (.*)");
 	}
@@ -118,7 +131,7 @@ public class MinecraftModule implements Module {
 
 	@Override
 	public String getMessagePrefix() {
-		return "[Minecraft]";
+		return "[Minecraft - " + this.getUsername() + "]";
 	}
 
 	@Override

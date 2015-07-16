@@ -41,6 +41,19 @@ public class MinecraftClassicModule implements Module {
 
 	public MinecraftClassicModule(String username, String password, String serverUrl) {
 		this();
+
+		if(username == null || username.isEmpty()) {
+			throw new IllegalArgumentException("Username cannot be null or empty.");
+		}
+
+		if(password == null || password.isEmpty()) {
+			throw new IllegalArgumentException("Password cannot be null or empty.");
+		}
+
+		if(serverUrl == null || serverUrl.isEmpty()) {
+			throw new IllegalArgumentException("Server URL cannot be null or empty.");
+		}
+
 		this.username = username;
 		this.password = password;
 		this.serverUrl = serverUrl;
@@ -48,6 +61,19 @@ public class MinecraftClassicModule implements Module {
 
 	public MinecraftClassicModule(String username, String verificationKey, String host, int port) {
 		this();
+
+		if(username == null || username.isEmpty()) {
+			throw new IllegalArgumentException("Username cannot be null or empty.");
+		}
+
+		if(verificationKey == null || verificationKey.isEmpty()) {
+			throw new IllegalArgumentException("Verification Key cannot be null or empty.");
+		}
+
+		if(host == null || host.isEmpty()) {
+			throw new IllegalArgumentException("Host cannot be null or empty.");
+		}
+
 		this.username = username;
 		this.verificationKey = verificationKey;
 		this.host = host;
@@ -143,7 +169,7 @@ public class MinecraftClassicModule implements Module {
 
 	@Override
 	public String getMessagePrefix() {
-		return "[MinecraftClassic]";
+		return "[MinecraftClassic - " + this.getUsername() + "]";
 	}
 
 	@Override

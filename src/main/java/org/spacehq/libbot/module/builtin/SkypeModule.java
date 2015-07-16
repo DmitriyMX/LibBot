@@ -1,113 +1,118 @@
 package org.spacehq.libbot.module.builtin;
 
-import com.skype.*;
+import com.samczsun.skype4j.Skype;
+import com.samczsun.skype4j.chat.Chat;
+import com.samczsun.skype4j.chat.ChatMessage;
+import com.samczsun.skype4j.events.Listener;
+import com.samczsun.skype4j.events.chat.message.MessageEditedEvent;
+import com.samczsun.skype4j.events.chat.message.MessageReceivedEvent;
+import com.samczsun.skype4j.exceptions.SkypeException;
+import com.samczsun.skype4j.formatting.Message;
+import com.samczsun.skype4j.formatting.Text;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.module.ModuleException;
 
+import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SkypeModule implements Module {
-	private String chatName;
+	private String username;
+	private String password;
 	private String chatId;
+
+	private Skype skype;
 	private Chat chat;
 
 	private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
 	private long startTime;
 
-	public SkypeModule(String chat) {
-		this(chat, false);
-	}
-
-	public SkypeModule(String chat, boolean name) {
-		if(name) {
-			this.chatName = chat;
-		} else {
-			this.chatId = chat;
+	public SkypeModule(String username, String password, String chatId) {
+		if(username == null || username.isEmpty()) {
+			throw new IllegalArgumentException("Username cannot be null or empty.");
 		}
+
+		if(password == null || password.isEmpty()) {
+			throw new IllegalArgumentException("Password cannot be null or empty.");
+		}
+
+		if(chatId == null || chatId.isEmpty()) {
+			throw new IllegalArgumentException("Chat ID cannot be null or empty.");
+		}
+
+		this.username = username;
+		this.password = password;
+		this.chatId = chatId;
 	}
 
 	@Override
 	public void connect() {
+		this.chat = null;
+
 		try {
-			if(!Skype.isRunning()) {
-				throw new ModuleException("Skype is not running.");
-			}
-
-			if(this.chatName != null) {
-				this.chatId = getChatId(this.chatName);
-				this.chatName = null;
-			}
-
-			this.chat = null;
-			for(Chat chat : Skype.getAllChats()) {
-				if(chat.getId().startsWith(this.chatId)) {
-					this.chat = chat;
-					break;
-				}
-			}
-
+			this.skype = Skype.login(username, password);
+			this.chat = this.skype.getChat(this.chatId);
 			if(this.chat == null) {
 				throw new ModuleException("Chat \"" + this.chatId + "\" does not exist.");
 			}
 
 			this.startTime = System.currentTimeMillis();
-			Skype.addChatMessageListener(new ChatMessageListener() {
-				@Override
-				public void chatMessageReceived(ChatMessage chatMessage) throws SkypeException {
-					receive(chatMessage);
+			this.skype.getEventDispatcher().registerListener(new Listener() {
+				public void onMessageReceived(MessageReceivedEvent e) throws SkypeException {
+					receive(e.getMessage());
 				}
 
-				@Override
-				public void chatMessageSent(ChatMessage chatMessage) throws SkypeException {
-					receive(chatMessage);
+				public void onMessageEdited(MessageEditedEvent e) throws SkypeException {
+					receive(e.getMessage());
 				}
 			});
-		} catch(SkypeException e) {
+		} catch(Exception e) {
 			throw new ModuleException("Failed to connect Skype module.", e);
 		}
 	}
 
 	private void receive(ChatMessage chatMessage) throws SkypeException {
-		if(this.chatId.equals(chatMessage.getChat().getId()) && chatMessage.getTime().getTime() > this.startTime) {
-			this.incoming.add(new ChatData(chatMessage.getSenderDisplayName(), chatMessage.getContent().trim()));
+		if(this.chatId.equals(chatMessage.getChat().getIdentity()) && chatMessage.getTime() > this.startTime) {
+			this.incoming.add(new ChatData(chatMessage.getSender().getDisplayName(), chatMessage.getMessage().asPlaintext().trim()));
 		}
 	}
 
 	@Override
 	public void disconnect(String reason) {
-		if(this.chat != null) {
+		if(this.skype != null && this.chat != null) {
 			System.out.println(this.getMessagePrefix() + " Disconnected: " + reason);
 		}
 
+		if(this.skype != null) {
+			try {
+				this.skype.logout();
+			} catch(IOException e) {
+			}
+		}
+
 		this.chat = null;
+		this.skype = null;
 	}
 
 	@Override
 	public String getUsername() {
-		try {
-			return Skype.getProfile().getFullName();
-		} catch(SkypeException e) {
-			throw new ModuleException("Failed to get username.", e);
+		if(this.skype != null && this.chat != null) {
+			return this.skype.getUsername();
+		} else {
+			return this.username;
 		}
 	}
 
 	@Override
 	public void setUsername(String name) {
-		try {
-			Skype.getProfile().setFullName(name);
-		} catch(SkypeException e) {
-			throw new ModuleException("Failed to set username.", e);
-		}
+		throw new UnsupportedOperationException("Cannot change Skype username.");
 	}
 
 	@Override
 	public String getMessagePrefix() {
-		return "[Skype]";
+		return "[Skype - " + this.getUsername() + "]";
 	}
 
 	@Override
@@ -119,10 +124,10 @@ public class SkypeModule implements Module {
 
 	@Override
 	public void chat(String message) {
-		if(this.chat != null) {
+		if(this.skype != null && this.chat != null) {
 			try {
-				this.chat.send(message);
-			} catch(SkypeException e) {
+				receive(this.chat.sendMessage(Message.create().with(Text.plain(message))));
+			} catch(Exception e) {
 				throw new ModuleException("Failed to send chat message.", e);
 			}
 		} else {
@@ -132,36 +137,5 @@ public class SkypeModule implements Module {
 
 	@Override
 	public void update() {
-	}
-
-	public static Map<String, String> getChats() {
-		Map<String, String> ret = new HashMap<String, String>();
-		try {
-			if(!Skype.isRunning()) {
-				return ret;
-			}
-
-			for(Chat chat : Skype.getAllChats()) {
-				ret.put(chat.getId(), chat.getWindowTitle());
-			}
-		} catch(SkypeException e) {
-			throw new ModuleException("Failed to get chats.", e);
-		}
-
-		return ret;
-	}
-
-	private static String getChatId(String chatName) {
-		try {
-			for(Chat chat : Skype.getAllChats()) {
-				if(chat.getWindowTitle().startsWith(chatName)) {
-					return chat.getId();
-				}
-			}
-		} catch(SkypeException e) {
-			throw new ModuleException("Failed to get chat ID for chat \"" + chatName + "\".", e);
-		}
-
-		return "";
 	}
 }
