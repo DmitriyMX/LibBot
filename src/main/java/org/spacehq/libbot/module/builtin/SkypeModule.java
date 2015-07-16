@@ -5,6 +5,7 @@ import com.samczsun.skype4j.chat.Chat;
 import com.samczsun.skype4j.chat.ChatMessage;
 import com.samczsun.skype4j.events.EventHandler;
 import com.samczsun.skype4j.events.Listener;
+import com.samczsun.skype4j.events.chat.message.MessageEditedByOtherEvent;
 import com.samczsun.skype4j.events.chat.message.MessageEditedEvent;
 import com.samczsun.skype4j.events.chat.message.MessageReceivedEvent;
 import com.samczsun.skype4j.formatting.Message;
@@ -80,12 +81,17 @@ public class SkypeModule implements Module {
 			this.skype.getEventDispatcher().registerListener(new Listener() {
 				@EventHandler
 				public void onMessageReceived(MessageReceivedEvent e) {
-					receive(e.getMessage());
+					receive(e.getMessage(), e.getMessage().getMessage().asPlaintext());
 				}
 
 				@EventHandler
 				public void onMessageEdited(MessageEditedEvent e) {
-					receive(e.getMessage());
+					receive(e.getMessage(), e.getMessage().getMessage().asPlaintext());
+				}
+
+				@EventHandler
+				public void onMessageEditedByOther(MessageEditedByOtherEvent e) {
+					receive(e.getMessage(), e.getNewContent());
 				}
 			});
 		} catch(BotException e) {
@@ -95,9 +101,9 @@ public class SkypeModule implements Module {
 		}
 	}
 
-	private void receive(ChatMessage chatMessage) {
+	private void receive(ChatMessage chatMessage, String content) {
 		if(this.chat.getIdentity().equals(chatMessage.getChat().getIdentity()) && chatMessage.getTime() > this.startTime) {
-			this.incoming.add(new ChatData(chatMessage.getSender().getDisplayName() != null ? chatMessage.getSender().getDisplayName() : chatMessage.getSender().getUsername(), chatMessage.getMessage().asPlaintext().trim()));
+			this.incoming.add(new ChatData(chatMessage.getSender().getDisplayName() != null ? chatMessage.getSender().getDisplayName() : chatMessage.getSender().getUsername(), content.trim()));
 		}
 	}
 
@@ -142,7 +148,8 @@ public class SkypeModule implements Module {
 	public void chat(String message) {
 		if(this.skype != null && this.chat != null) {
 			try {
-				receive(this.chat.sendMessage(Message.create().with(Text.plain(message))));
+				ChatMessage msg = this.chat.sendMessage(Message.create().with(Text.plain(message)));
+				receive(msg, msg.getMessage().asPlaintext());
 			} catch(IllegalArgumentException e) {
 				// TODO: Stop this from happening ("User must not be null" internally). Until then, swallow these exceptions.
 			} catch(Exception e) {

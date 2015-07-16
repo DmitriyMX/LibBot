@@ -8,6 +8,7 @@ import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.module.builtin.*;
 
 public class ExampleBot extends Bot {
+	private static final boolean CONSOLE = true;
 	private static final boolean MINECRAFT = true;
 	private static final boolean MINECRAFT_CLASSIC = true;
 	private static final boolean IRC = true;
@@ -26,29 +27,33 @@ public class ExampleBot extends Bot {
 		this.getCommandManager().setParser(new SpacedCommandParser());
 		this.getCommandManager().register(new HelpCommand(10));
 		this.getCommandManager().register(new ExampleCommands());
-		this.addModule("Console", new ConsoleModule(this));
+
+		if(CONSOLE) {
+			this.addModule(new ConsoleModule("Console", this));
+		}
+
 		if(MINECRAFT) {
-			this.addModule("Minecraft", new MinecraftModule("localhost", 25565, "Username", "Password"));
+			this.addModule(new MinecraftModule("Minecraft", "Username", "Password", "localhost", 25565));
 		}
 
 		if(MINECRAFT_CLASSIC) {
-			this.addModule("MinecraftClassic", new MinecraftClassicModule("Username", "Password", "Server URL"));
+			this.addModule(new MinecraftClassicModule("MinecraftClassic", "Username", "Password", "Server URL"));
 		}
 
 		if(IRC) {
-			this.addModule("IRC", new IRCModule("ExampleBot", "localhost", "#channel"));
+			this.addModule(new IRCModule("IRC", "ExampleBot", "localhost", "#channel"));
 		}
 
 		if(SKYPE) {
-			this.addModule("Skype", new SkypeModule("Username", "Password", "Skype chat ID"));
+			this.addModule(new SkypeModule("Skype", "Username", "Password", "Skype chat ID"));
 		}
 
 		if(SLACK) {
-			this.addModule("Slack", new SlackModule("Token", "#channel", "Username"));
+			this.addModule(new SlackModule("Slack", "Token", "#channel", "Username"));
 		}
 
 		if(HIP_CHAT) {
-			this.addModule("HipChat", new HipChatModule("Token", "Room", "Username"));
+			this.addModule(new HipChatModule("HipChat", "Token", "Room", "Username"));
 		}
 	}
 
@@ -57,11 +62,11 @@ public class ExampleBot extends Bot {
 	}
 
 	@Override
-	public void onChat(String moduleId, Module module, ChatData data) {
+	public void onChat(Module module, ChatData data) {
 	}
 
 	@Override
-	public boolean onCommand(String moduleId, Module module, ChatData data) {
+	public boolean onCommand(Module module, ChatData data) {
 		return true;
 	}
 }

@@ -325,6 +325,10 @@ public class CommandManager {
 					if(execCount == 0) {
 						ArgsExecutor exec = new ArgsExecutor(source);
 						String cmd = str.substring(execStart, index);
+						if(!cmd.startsWith(this.getPrefix())) {
+							cmd = this.getPrefix() + cmd;
+						}
+
 						this.execute(exec, new ChatData(source.getUsername(), cmd), true);
 						args.add(exec.getResult());
 						execStart = -1;
