@@ -7,4 +7,9 @@ public class EmptyPermissionManager implements PermissionManager {
 	public boolean hasPermission(Module source, String user, String permission) {
 		return true;
 	}
+
+	@Override
+	public boolean setPermission(Module source, String user, String permission, boolean has) {
+		return true;
+	}
 }
