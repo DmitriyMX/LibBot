@@ -1,5 +1,10 @@
 package org.spacehq.libbot.chat.cmd.parser;
 
+/**
+ * Parses a command with spaces separating each part.
+ *
+ * command arg1 arg2 arg3...
+ */
 public class SpacedCommandParser implements CommandParser {
 	@Override
 	public String getCommand(String message) {

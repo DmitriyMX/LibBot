@@ -2,7 +2,7 @@ package org.spacehq.libbot.module.builtin;
 
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
-import org.spacehq.libbot.module.ModuleException;
+import org.spacehq.libbot.module.BotException;
 import org.spacehq.libbot.util.Conditions;
 import org.spacehq.mc.classic.protocol.AuthenticationException;
 import org.spacehq.mc.classic.protocol.ClassicProtocol;
@@ -21,9 +21,13 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Module for connecting to a Minecraft Classic server.
+ */
 public class MinecraftClassicModule implements Module {
 	private static final Pattern COLOR_PATTERN = Pattern.compile("(?i)&[0-9A-FK-OR]");
 
+	private String id;
 	private String username;
 	private String password;
 	private String serverUrl;
@@ -35,50 +39,89 @@ public class MinecraftClassicModule implements Module {
 	private List<ChatData> incoming = new ArrayList<ChatData>();
 	private List<Pattern> chatPatterns = new ArrayList<Pattern>();
 
-	private MinecraftClassicModule() {
+	private MinecraftClassicModule(String id, String username) {
+		Conditions.notNullOrEmpty(id, "Id");
+		Conditions.notNullOrEmpty(username, "Username");
+
+		this.id = id;
+		this.username = username;
+
 		this.addChatPattern("\\<([A-Za-z0-9_-]+)\\> (.*)");
 		this.addChatPattern("\\[([A-Za-z0-9_-]+)\\] (.*)");
 	}
 
-	public MinecraftClassicModule(String username, String password, String serverUrl) {
-		this();
+	/**
+	 * Creates a new MinecraftClassicModule instance.
+	 * @param id ID of the module.
+	 * @param username Username to connect with.
+	 * @param password Password to connect with.
+	 * @param serverUrl URL of the server to connect to.
+	 */
+	public MinecraftClassicModule(String id, String username, String password, String serverUrl) {
+		this(id, username);
 
-		Conditions.notNullOrEmpty(username, "Username");
 		Conditions.notNullOrEmpty(password, "Password");
 		Conditions.notNullOrEmpty(serverUrl, "Server URL");
 
-		this.username = username;
 		this.password = password;
 		this.serverUrl = serverUrl;
 	}
 
-	public MinecraftClassicModule(String username, String verificationKey, String host, int port) {
-		this();
+	/**
+	 * Creates a new MinecraftClassicModule instance.
+	 * @param id ID of the module.
+	 * @param username Username to connect with.
+	 * @param verificationKey Verification Key to connect with.
+	 * @param host Host of the server to connect to.
+	 * @param port Port of the server to connect to.
+	 */
+	public MinecraftClassicModule(String id, String username, String verificationKey, String host, int port) {
+		this(id, username);
 
-		Conditions.notNullOrEmpty(username, "Username");
 		Conditions.notNullOrEmpty(verificationKey, "Verification Key");
 		Conditions.notNullOrEmpty(host, "Host");
 
-		this.username = username;
 		this.verificationKey = verificationKey;
 		this.host = host;
 		this.port = port;
 	}
 
+	/**
+	 * Gets a list of chat patterns used to identify chat messages.
+	 * The first group identifies the username, and the second group identifies the chat message.
+	 * @return A list of chat patterns used to identify chat messages.
+	 */
 	public List<Pattern> getChatPatterns() {
 		return new ArrayList<Pattern>(this.chatPatterns);
 	}
 
+	/**
+	 * Adds a chat pattern for identifying chat messages.
+	 * The first group should identify the username, and the second group should identify the chat message.
+	 * @param pattern Pattern to add.
+	 * @return This module, for chaining method calls.
+	 */
 	public MinecraftClassicModule addChatPattern(String pattern) {
 		this.addChatPattern(Pattern.compile(pattern));
 		return this;
 	}
 
+	/**
+	 * Adds a chat pattern for identifying chat messages.
+	 * The first group should identify the username, and the second group should identify the chat message.
+	 * @param pattern Pattern to add.
+	 * @return This module, for chaining method calls.
+	 */
 	public MinecraftClassicModule addChatPattern(Pattern pattern) {
 		this.chatPatterns.add(pattern);
 		return this;
 	}
 
+	/**
+	 * Removes a chat pattern.
+	 * @param pattern Pattern to remove.
+	 * @return This module, for chaining method calls.
+	 */
 	public MinecraftClassicModule removeChatPattern(String pattern) {
 		Pattern remove = null;
 		for(Pattern p : this.chatPatterns) {
@@ -95,9 +138,19 @@ public class MinecraftClassicModule implements Module {
 		return this;
 	}
 
+	/**
+	 * Removes a chat pattern.
+	 * @param pattern Pattern to remove.
+	 * @return This module, for chaining method calls.
+	 */
 	public MinecraftClassicModule removeChatPattern(Pattern pattern) {
 		this.chatPatterns.remove(pattern);
 		return this;
+	}
+
+	@Override
+	public String getId() {
+		return this.id;
 	}
 
 	@Override
@@ -115,7 +168,7 @@ public class MinecraftClassicModule implements Module {
 			try {
 				ServerList.login(this.username, this.password);
 			} catch(AuthenticationException e) {
-				throw new ModuleException("Failed to authenticate MinecraftClassicModule.", e);
+				throw new BotException("Failed to authenticate MinecraftClassicModule.", e);
 			}
 
 			ServerURLInfo info = ServerList.getServerInfo(this.serverUrl);
@@ -138,13 +191,13 @@ public class MinecraftClassicModule implements Module {
 	@Override
 	public void disconnect(String reason) {
 		if(this.conn != null) {
-			System.out.println(this.getMessagePrefix() + " Disconnected: " + reason);
+			System.out.println("[" + this.id + "] Disconnected: " + reason);
 			if(this.conn.getSession().isConnected()) {
 				this.conn.getSession().disconnect(reason);
 			}
-		}
 
-		this.conn = null;
+			this.conn = null;
+		}
 	}
 
 	@Override
@@ -155,19 +208,6 @@ public class MinecraftClassicModule implements Module {
 	@Override
 	public void setUsername(String name) {
 		throw new UnsupportedOperationException("Cannot set name using MinecraftClassicModule.");
-	}
-
-	@Override
-	public String getMessagePrefix() {
-		String server = "";
-		if(this.serverUrl != null) {
-			int end = this.serverUrl.endsWith("/") ? this.serverUrl.length() - 2 : this.serverUrl.length() - 1;
-			server = this.serverUrl.substring(this.serverUrl.lastIndexOf("/", end), end);
-		} else {
-			server = this.host + ":" + this.port;
-		}
-
-		return "[MinecraftClassic - " + this.username + " - " + server + "]";
 	}
 
 	@Override

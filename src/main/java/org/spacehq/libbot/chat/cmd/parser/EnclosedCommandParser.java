@@ -1,5 +1,10 @@
 package org.spacehq.libbot.chat.cmd.parser;
 
+/**
+ * Parses a command in the style of a method invocation.
+ *
+ * command(arg1, arg2, arg3...)
+ */
 public class EnclosedCommandParser implements CommandParser {
 	@Override
 	public String getCommand(String message) {

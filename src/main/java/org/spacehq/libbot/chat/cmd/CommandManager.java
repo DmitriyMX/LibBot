@@ -13,6 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Manages commands and their basic configuration.
+ */
 public class CommandManager {
 	private Map<String, ExecutionInfo> commands = new HashMap<String, ExecutionInfo>();
 	private CommandParser parser = new SpacedCommandParser();
@@ -21,102 +24,196 @@ public class CommandManager {
 	private boolean acceptCommandsFromSelf = false;
 	private String prefix = "#";
 	private String unknownCommandFormat = "Unknown command \"%1$s\", %2$s.";
-	private String noPermissionFormat = "You don't have permission to use \"%1$s\", %2$s.";
+	private String permissionDeniedFormat = "You don't have permission to use \"%1$s\", %2$s.";
 	private String incorrectUsageFormat = "Incorrect usage of \"%1$s\", %2$s.";
 	private String usageFormat = "Usage: %1$s";
 
+	/**
+	 * Gets the current parser used for parsing commands from a chat message.
+	 * @return The current command parser.
+	 */
 	public CommandParser getParser() {
 		return this.parser;
 	}
 
+	/**
+	 * Sets the current parser used for parsing commands from a chat message.
+	 * @param parser Parser to use.
+	 */
 	public void setParser(CommandParser parser) {
 		this.parser = parser;
 	}
 
+	/**
+	 * Gets the current permission manager.
+	 * @return The current permission manager.
+	 */
 	public PermissionManager getPermissionManager() {
 		return this.permManager;
 	}
 
+	/**
+	 * Sets the current permission manager.
+	 * @param manager Permission manager to use.
+	 */
 	public void setPermissionManager(PermissionManager manager) {
 		this.permManager = manager;
 	}
 
+	/**
+	 * Gets whether commands should be executed in a unique thread.
+	 * @return Whether commands should be multithreaded.
+	 */
 	public boolean isMultiThreaded() {
 		return this.multiThreaded;
 	}
 
+	/**
+	 * Sets whether commands should be executed in a unique thread.
+	 * @return Whether commands should be multithreaded.
+	 */
 	public void setMultiThreaded(boolean multiThreaded) {
 		this.multiThreaded = multiThreaded;
 	}
 
+	/**
+	 * Gets whether commands sent using the bot's username should be accepted.
+	 * @return Whether commands sent using the bot's username should be accepted.
+	 */
 	public boolean getAcceptCommandsFromSelf() {
 		return this.acceptCommandsFromSelf;
 	}
 
+	/**
+	 * Sets whether commands sent using the bot's username should be accepted.
+	 * @return Whether commands sent using the bot's username should be accepted.
+	 */
 	public void setAcceptCommandsFromSelf(boolean accept) {
 		this.acceptCommandsFromSelf = accept;
 	}
 
+	/**
+	 * Gets the prefix used to signify a command.
+	 * @return The current command prefix.
+	 */
 	public String getPrefix() {
 		return this.prefix;
 	}
 
+	/**
+	 * Sets the prefix used to signify a command.
+	 * @param prefix Command prefix to use.
+	 */
 	public void setPrefix(String prefix) {
 		this.prefix = prefix;
 	}
 
+	/**
+	 * Gets the format used when sending an unknown command message.
+	 * The first parameter provided is the command name, and the second parameter provided is the user who used the command.
+	 * @return The format used when sending an unknown command message.
+	 */
 	public String getUnknownCommandFormat() {
 		return this.unknownCommandFormat;
 	}
 
+	/**
+	 * Sets the format used when sending an unknown command message.
+	 * The first parameter provided is the command name, and the second parameter provided is the user who used the command.
+	 * @return Format to use when sending an unknown command message.
+	 */
 	public void setUnknownCommandFormat(String format) {
 		this.unknownCommandFormat = format;
 	}
 
-	public String getNoPermissionFormat() {
-		return this.noPermissionFormat;
+	/**
+	 * Gets the format used when sending a permission denied message.
+	 * The first parameter provided is the command name the permission is for, and the second parameter provided is the user who used the command.
+	 * @return The format used when sending a permission denied message.
+	 */
+	public String getPermissionDeniedFormat() {
+		return this.permissionDeniedFormat;
 	}
 
-	public void setNoPermissionFormat(String format) {
-		this.noPermissionFormat = format;
+	/**
+	 * Sets the format used when sending a permission denied message.
+	 * The first parameter provided is the command name the permission is for, and the second parameter provided is the user who used the command.
+	 * @return Format to use when sending a permission denied message.
+	 */
+	public void setPermissionDeniedFormat(String format) {
+		this.permissionDeniedFormat = format;
 	}
 
+	/**
+	 * Gets the format used when sending an incorrect usage message.
+	 * The first parameter provided is the command name, and the second parameter provided is the user who used the command.
+	 * @return The format used when sending an incorrect usage message.
+	 */
 	public String getIncorrectUsageFormat() {
 		return this.incorrectUsageFormat;
 	}
 
+	/**
+	 * Sets the format used when sending an incorrect usage message.
+	 * The first parameter provided is the command name, and the second parameter provided is the user who used the command.
+	 * @return Format to use when sending an incorrect usage message.
+	 */
 	public void setIncorrectUsageFormat(String format) {
 		this.incorrectUsageFormat = format;
 	}
 
+	/**
+	 * Gets the format used when sending a usage message.
+	 * The only parameter provided is the command's usage information.
+	 * @return The format used when sending a usage message.
+	 */
 	public String getUsageFormat() {
 		return this.usageFormat;
 	}
 
+	/**
+	 * Sets the format used when sending a usage message.
+	 * The only parameter provided is the command's usage information.
+	 * @return Format to use when sending a usage message.
+	 */
 	public void setUsageFormat(String format) {
 		this.usageFormat = format;
 	}
 
-	public void register(CommandExecutor exec) {
-		for(Method method : exec.getClass().getDeclaredMethods()) {
+	/**
+	 * Registers a command executor.
+	 * Command executors should contain methods with a command annotation and the following arguments:
+	 * (Module source, CommandManager commands, String sender, String alias, String args[])
+	 * @param executor Executor to register.
+	 */
+	public void register(Object executor) {
+		for(Method method : executor.getClass().getDeclaredMethods()) {
 			Command command = method.getAnnotation(Command.class);
 			if(command != null) {
 				for(String alias : command.aliases()) {
-					this.commands.put(alias, new ExecutionInfo(exec, command, method));
+					this.commands.put(alias, new ExecutionInfo(executor, command, method));
 				}
 			}
 		}
 	}
 
-	public void remove(CommandExecutor exec) {
+	/**
+	 * Unregisters a command executor.
+	 * @param executor Executor to unregister.
+	 */
+	public void unregister(Object executor) {
 		for(String command : this.commands.keySet()) {
 			ExecutionInfo info = this.commands.get(command);
-			if(info.getExecutor() == exec) {
+			if(info.getExecutor() == executor) {
 				this.commands.remove(command);
 			}
 		}
 	}
 
+	/**
+	 * Gets a list of registered commands.
+	 * @return A list of registered commands.
+	 */
 	public List<Command> getCommands() {
 		List<Command> ret = new ArrayList<Command>();
 		for(ExecutionInfo info : this.commands.values()) {
@@ -128,6 +225,12 @@ public class CommandManager {
 		return ret;
 	}
 
+	/**
+	 * Gets a list of commands available to the given user from the given source.
+	 * @param source Module that the user is communicating from.
+	 * @param user User to get commands for.
+	 * @return As list of ommands available to the given user from the given source.
+	 */
 	public List<Command> getCommands(Module source, String user) {
 		List<Command> ret = new ArrayList<Command>();
 		for(ExecutionInfo info : this.commands.values()) {
@@ -139,7 +242,12 @@ public class CommandManager {
 		return ret;
 	}
 
-	public void execute(final Module source, final ChatData message) {
+	/**
+	 * Attempts to execute a command from the given message.
+	 * @param source Module that the user is communicating from.
+	 * @param message Chat message containing the command.
+	 */
+	public void execute(Module source, ChatData message) {
 		this.execute(source, message, false);
 	}
 
@@ -159,8 +267,8 @@ public class CommandManager {
 
 		Command command = exec.getCommand();
 		if(!this.permManager.hasPermission(source, message.getUser(), command.permission())) {
-			if(this.noPermissionFormat != null) {
-				source.chat(String.format(this.noPermissionFormat, prefixed, message.getUser()));
+			if(this.permissionDeniedFormat != null) {
+				source.chat(String.format(this.permissionDeniedFormat, prefixed, message.getUser()));
 			}
 
 			return;
@@ -215,7 +323,7 @@ public class CommandManager {
 				if(c == '}' && str.charAt(index - 1) != '\\') {
 					execCount--;
 					if(execCount == 0) {
-						ArgsExecutor exec = new ArgsExecutor(source.getUsername());
+						ArgsExecutor exec = new ArgsExecutor(source);
 						String cmd = str.substring(execStart, index);
 						this.execute(exec, new ChatData(source.getUsername(), cmd), true);
 						args.add(exec.getResult());
@@ -258,17 +366,17 @@ public class CommandManager {
 	}
 
 	private static class ExecutionInfo {
-		private CommandExecutor executor;
+		private Object executor;
 		private Command cmd;
 		private Method method;
 
-		public ExecutionInfo(CommandExecutor executor, Command cmd, Method method) {
+		public ExecutionInfo(Object executor, Command cmd, Method method) {
 			this.method = method;
 			this.cmd = cmd;
 			this.executor = executor;
 		}
 
-		public CommandExecutor getExecutor() {
+		public Object getExecutor() {
 			return this.executor;
 		}
 

@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
-import org.spacehq.libbot.module.ModuleException;
+import org.spacehq.libbot.module.BotException;
 import org.spacehq.libbot.util.Conditions;
 
 import java.io.IOException;
@@ -20,10 +20,14 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * Module for connecting to a HipChat room.
+ */
 public class HipChatModule implements Module {
 	private static final String BASE_URL = "https://www.hipchat.com/v1/";
 	private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
+	private String id;
 	private String token;
 	private String room;
 	private String username;
@@ -32,14 +36,28 @@ public class HipChatModule implements Module {
 	private long lastReceived;
 	private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
 
-	public HipChatModule(String token, String room, String username) {
+	/**
+	 * Creates a new HipChatModule instance.
+	 * @param id ID of the module.
+	 * @param token HipChat API token to use.
+	 * @param room Room to connect to.
+	 * @param username Username to connect with.
+	 */
+	public HipChatModule(String id, String token, String room, String username) {
+		Conditions.notNullOrEmpty(id, "Id");
 		Conditions.notNullOrEmpty(token, "Token");
 		Conditions.notNullOrEmpty(room, "Room");
 		Conditions.notNullOrEmpty(username, "Username");
 
+		this.id = id;
 		this.token = token;
 		this.room = room;
 		this.username = username;
+	}
+
+	@Override
+	public String getId() {
+		return this.id;
 	}
 
 	@Override
@@ -59,7 +77,7 @@ public class HipChatModule implements Module {
 		}
 
 		if(this.roomId == null) {
-			throw new ModuleException("Could not find room \"" + this.room + "\".");
+			throw new BotException("Could not find room \"" + this.room + "\".");
 		}
 
 		this.lastReceived = System.currentTimeMillis();
@@ -67,13 +85,11 @@ public class HipChatModule implements Module {
 
 	@Override
 	public void disconnect(String reason) {
-		if(this.roomId == null) {
-			return;
+		if(this.roomId != null) {
+			System.out.println("[" + this.id + "] Disconnected: " + reason);
+			this.roomId = null;
+			this.lastReceived = 0;
 		}
-
-		System.out.println(this.getMessagePrefix() + " Disconnected: " + reason);
-		this.roomId = null;
-		this.lastReceived = 0;
 	}
 
 	@Override
@@ -86,11 +102,6 @@ public class HipChatModule implements Module {
 		Conditions.notNullOrEmpty(name, "Username");
 
 		this.username = name;
-	}
-
-	@Override
-	public String getMessagePrefix() {
-		return "[HipChat - " + this.getUsername() + " - " + this.room + "]";
 	}
 
 	@Override
@@ -128,7 +139,7 @@ public class HipChatModule implements Module {
 				int end = date.contains("+") ? date.lastIndexOf("+") : date.contains("-") ? date.lastIndexOf("-") : date.length();
 				timestamp = DATE_FORMAT.parse(date.substring(0, end)).getTime();
 			} catch(ParseException e1) {
-				throw new ModuleException("Failed to parse date.", e1);
+				throw new BotException("Failed to parse date.", e1);
 			}
 
 			String text = message.get("message").getAsString();
@@ -160,7 +171,7 @@ public class HipChatModule implements Module {
 			in = new URL(BASE_URL + method + build.toString()).openStream();
 			return new Gson().fromJson(new InputStreamReader(in), JsonObject.class);
 		} catch(Exception e) {
-			throw new ModuleException("Failed to call HipChat API method \"" + method + "\".", e);
+			throw new BotException("Failed to call HipChat API method \"" + method + "\".", e);
 		} finally {
 			if(in != null) {
 				try {

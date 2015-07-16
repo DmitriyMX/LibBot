@@ -3,6 +3,9 @@ package org.spacehq.libbot.util;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Provides utility methods related to HTML escaping.
+ */
 public class HtmlEscaping {
 	private static final Map<String, Integer> ENTITIES = new HashMap<String, Integer>();
 
@@ -259,6 +262,11 @@ public class HtmlEscaping {
 		ENTITIES.put("&euro;", 8364);
 	}
 
+	/**
+	 * Unescapes a string, replacing HTML entities with the proper characters.
+	 * @param str String to unescape.
+	 * @return The resulting unescaped string.
+	 */
 	public static String unescape(String str) {
 		for(String entity : ENTITIES.keySet()) {
 			str = str.replace(entity, String.valueOf((char) ENTITIES.get(entity).intValue()));

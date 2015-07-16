@@ -11,15 +11,32 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Module allowing commands to be executed from the console.
+ */
 public class ConsoleModule implements Module {
-	private List<ChatData> incoming = new ArrayList<ChatData>();
-	private Thread thread;
+	private String id;
 	private Bot bot;
 
-	public ConsoleModule(Bot bot) {
+	private List<ChatData> incoming = new ArrayList<ChatData>();
+	private Thread thread;
+
+	/**
+	 * Creates a new ConsoleModule instance.
+	 * @param id ID of the module.
+	 * @param bot Bot the module belongs to.
+	 */
+	public ConsoleModule(String id, Bot bot) {
+		Conditions.notNullOrEmpty(id, "Id");
 		Conditions.notNull(bot, "Bot");
 
+		this.id = id;
 		this.bot = bot;
+	}
+
+	@Override
+	public String getId() {
+		return this.id;
 	}
 
 	@Override
@@ -47,11 +64,6 @@ public class ConsoleModule implements Module {
 	@Override
 	public void setUsername(String name) {
 		throw new UnsupportedOperationException("ConsoleModule does not have a username.");
-	}
-
-	@Override
-	public String getMessagePrefix() {
-		return "[Console]";
 	}
 
 	@Override

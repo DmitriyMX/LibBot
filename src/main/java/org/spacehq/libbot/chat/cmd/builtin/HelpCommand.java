@@ -1,16 +1,22 @@
 package org.spacehq.libbot.chat.cmd.builtin;
 
 import org.spacehq.libbot.chat.cmd.Command;
-import org.spacehq.libbot.chat.cmd.CommandExecutor;
 import org.spacehq.libbot.chat.cmd.CommandManager;
 import org.spacehq.libbot.module.Module;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class HelpCommand implements CommandExecutor {
+/**
+ * Provides a command detailing the various commands a user has access to.
+ */
+public class HelpCommand {
 	private int linesPerPage;
 
+	/**
+	 * Creates a new HelpCommand instance.
+	 * @param linesPerPage Number of help lines to display per page.
+	 */
 	public HelpCommand(int linesPerPage) {
 		this.linesPerPage = linesPerPage;
 	}

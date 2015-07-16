@@ -11,7 +11,7 @@ import com.samczsun.skype4j.formatting.Message;
 import com.samczsun.skype4j.formatting.Text;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
-import org.spacehq.libbot.module.ModuleException;
+import org.spacehq.libbot.module.BotException;
 import org.spacehq.libbot.util.Conditions;
 
 import java.io.IOException;
@@ -19,7 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * Module for connecting to a Skype chat.
+ */
 public class SkypeModule implements Module {
+	private String id;
 	private String username;
 	private String password;
 	private String chatId;
@@ -30,14 +34,28 @@ public class SkypeModule implements Module {
 	private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
 	private long startTime;
 
-	public SkypeModule(String username, String password, String chatId) {
+	/**
+	 * Creates a new SkypeModule instance.
+	 * @param id ID of the module.
+	 * @param username Username to connect with.
+	 * @param password Password to connect with.
+	 * @param chatId ID of the chat to connect to.
+	 */
+	public SkypeModule(String id, String username, String password, String chatId) {
+		Conditions.notNullOrEmpty(id, "Id");
 		Conditions.notNullOrEmpty(username, "Username");
 		Conditions.notNullOrEmpty(password, "Password");
 		Conditions.notNullOrEmpty(chatId, "Chat ID");
 
+		this.id = id;
 		this.username = username;
 		this.password = password;
 		this.chatId = chatId;
+	}
+
+	@Override
+	public String getId() {
+		return this.id;
 	}
 
 	@Override
@@ -55,7 +73,7 @@ public class SkypeModule implements Module {
 
 			this.chat = this.skype.getChat(this.chatId);
 			if(this.chat == null) {
-				throw new ModuleException("Chat \"" + this.chatId + "\" does not exist.");
+				throw new BotException("Chat \"" + this.chatId + "\" does not exist.");
 			}
 
 			this.startTime = System.currentTimeMillis();
@@ -70,10 +88,10 @@ public class SkypeModule implements Module {
 					receive(e.getMessage());
 				}
 			});
-		} catch(ModuleException e) {
+		} catch(BotException e) {
 			throw e;
 		} catch(Exception e) {
-			throw new ModuleException("Failed to connect Skype module.", e);
+			throw new BotException("Failed to connect Skype module.", e);
 		}
 	}
 
@@ -85,20 +103,18 @@ public class SkypeModule implements Module {
 
 	@Override
 	public void disconnect(String reason) {
-		if(this.skype != null && this.chat != null) {
-			System.out.println(this.getMessagePrefix() + " Disconnected: " + reason);
-		}
-
 		if(this.skype != null) {
+			System.out.println("[" + this.id + "] Disconnected: " + reason);
+			this.chat = null;
+
 			try {
 				this.skype.logout();
+				this.skype = null;
 			} catch(IOException e) {
-				throw new ModuleException("Failed to disconnect Skype module.", e);
+				this.skype = null;
+				throw new BotException("Failed to disconnect Skype module.", e);
 			}
 		}
-
-		this.chat = null;
-		this.skype = null;
 	}
 
 	@Override
@@ -116,11 +132,6 @@ public class SkypeModule implements Module {
 	}
 
 	@Override
-	public String getMessagePrefix() {
-		return "[Skype - " + this.getUsername() + " - " + this.chatId + "]";
-	}
-
-	@Override
 	public List<ChatData> getIncomingChat() {
 		List<ChatData> incoming = new ArrayList<ChatData>(this.incoming);
 		this.incoming.removeAll(incoming);
@@ -135,10 +146,10 @@ public class SkypeModule implements Module {
 			} catch(IllegalArgumentException e) {
 				// TODO: Stop this from happening ("User must not be null" internally). Until then, swallow these exceptions.
 			} catch(Exception e) {
-				throw new ModuleException("Failed to send chat message.", e);
+				throw new BotException("Failed to send chat message.", e);
 			}
 		} else {
-			throw new ModuleException("Module not connected.");
+			throw new BotException("Module not connected.");
 		}
 	}
 

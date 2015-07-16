@@ -3,7 +3,7 @@ package org.spacehq.libbot.module.builtin;
 import com.google.gson.*;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
-import org.spacehq.libbot.module.ModuleException;
+import org.spacehq.libbot.module.BotException;
 import org.spacehq.libbot.util.Conditions;
 import org.spacehq.libbot.util.HtmlEscaping;
 
@@ -18,9 +18,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * Module for connecting to a Slack chat.
+ */
 public class SlackModule implements Module {
 	private static final String BASE_URL = "https://slack.com/api/";
 
+	private String id;
 	private String token;
 	private String channel;
 	private String username;
@@ -30,14 +34,28 @@ public class SlackModule implements Module {
 	private Map<String, String> users = new HashMap<String, String>();
 	private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
 
-	public SlackModule(String token, String channel, String username) {
+	/**
+	 * Creates a new SlackModule instance.
+	 * @param id ID of the module.
+	 * @param token Slack API token to use.
+	 * @param channel Channel to connect to.
+	 * @param username Username to connect with.
+	 */
+	public SlackModule(String id, String token, String channel, String username) {
+		Conditions.notNullOrEmpty(id, "Id");
 		Conditions.notNullOrEmpty(token, "Token");
 		Conditions.notNullOrEmpty(channel, "Channel");
 		Conditions.notNullOrEmpty(username, "Username");
 
+		this.id = id;
 		this.token = token;
 		this.channel = channel;
 		this.username = username;
+	}
+
+	@Override
+	public String getId() {
+		return this.id;
 	}
 
 	@Override
@@ -53,15 +71,13 @@ public class SlackModule implements Module {
 
 	@Override
 	public void disconnect(String reason) {
-		if(this.channelId == null) {
-			return;
+		if(this.channelId != null) {
+			System.out.println("[" + this.id + "] Disconnected: " + reason);
+			this.call("channels.leave", "channel", this.channelId);
+			this.channelId = null;
+			this.lastReceived = 0;
+			this.users.clear();
 		}
-
-		System.out.println(this.getMessagePrefix() + " Disconnected: " + reason);
-		this.call("channels.leave", "channel", this.channelId);
-		this.channelId = null;
-		this.lastReceived = 0;
-		this.users.clear();
 	}
 
 	@Override
@@ -74,11 +90,6 @@ public class SlackModule implements Module {
 		Conditions.notNullOrEmpty(name, "Username");
 
 		this.username = name;
-	}
-
-	@Override
-	public String getMessagePrefix() {
-		return "[Slack - " + this.getUsername() + " - " + this.channel + "]";
 	}
 
 	@Override
@@ -154,12 +165,12 @@ public class SlackModule implements Module {
 			JsonObject json = new Gson().fromJson(new InputStreamReader(in), JsonObject.class);
 			JsonPrimitive ok = json.get("ok").getAsJsonPrimitive();
 			if((ok.isBoolean() && !json.get("ok").getAsBoolean()) || (ok.isNumber() && json.get("ok").getAsInt() != 1)) {
-				throw new ModuleException("Failed to call Slack API method \"" + method + "\": " + json.get("error").getAsString());
+				throw new BotException("Failed to call Slack API method \"" + method + "\": " + json.get("error").getAsString());
 			}
 
 			return json;
 		} catch(Exception e) {
-			throw new ModuleException("Failed to call Slack API method \"" + method + "\".", e);
+			throw new BotException("Failed to call Slack API method \"" + method + "\".", e);
 		} finally {
 			if(in != null) {
 				try {

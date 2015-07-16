@@ -9,11 +9,18 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * The main class of a bot.
+ */
 public abstract class Bot {
 	private boolean running = true;
 	private final CommandManager commands = new CommandManager();
 	private final Map<String, Module> modules = new LinkedHashMap<String, Module>();
 
+	/**
+	 * Starts the bot.
+	 * @param args Arguments to pass to the bot.
+	 */
 	public final void start(String args[]) {
 		try {
 			this.initBot(args);
@@ -26,13 +33,31 @@ public abstract class Bot {
 		this.run();
 	}
 
+	/**
+	 * Called when initializing the bot.
+	 * @param args Arguments passed to the bot.
+	 */
 	public abstract void initBot(String args[]);
 
+	/**
+	 * Called when shutting down the bot.
+	 */
 	public abstract void shutdownBot();
 
-	public abstract void onChat(String moduleId, Module module, ChatData data);
+	/**
+	 * Called when a chat message is received.
+	 * @param module Module that the chat message originated from.
+	 * @param data Details of the received chat message.
+	 */
+	public abstract void onChat(Module module, ChatData data);
 
-	public abstract boolean onCommand(String moduleId, Module module, ChatData data);
+	/**
+	 * Called when a chat message containing a command is received.
+	 * @param module Module that the chat message originated from.
+	 * @param data Details of the received chat message.
+	 * @return Whether the command should be executed.
+	 */
+	public abstract boolean onCommand(Module module, ChatData data);
 
 	private final void run() {
 		while(this.running) {
@@ -45,13 +70,13 @@ public abstract class Bot {
 							List<ChatData> chat = module.getIncomingChat();
 							for(ChatData data : chat) {
 								if(data != null) {
-									System.out.println(module.getMessagePrefix() + " " + data.getUser() + ": " + data.getMessage());
+									System.out.println("[" + module.getId() + "] " + data.getUser() + ": " + data.getMessage());
 									if(data.getMessage().startsWith(this.commands.getPrefix()) && (this.commands.getAcceptCommandsFromSelf() || !data.getUser().equals(module.getUsername()))) {
 										boolean execute = false;
 										try {
-											execute = this.onCommand(id, module, data);
+											execute = this.onCommand(module, data);
 										} catch(Throwable t) {
-											System.err.println(module.getMessagePrefix() + " An error occured while handling a command.");
+											System.err.println("[" + module.getId() + "] An error occured while handling a command.");
 											t.printStackTrace();
 										}
 
@@ -59,22 +84,22 @@ public abstract class Bot {
 											try {
 												this.commands.execute(module, data);
 											} catch(Exception e) {
-												System.err.println(module.getMessagePrefix() + " An error occured while executing a command.");
+												System.err.println("[" + module.getId() + "] An error occured while executing a command.");
 												e.printStackTrace();
 											}
 										}
 									} else {
 										try {
-											this.onChat(id, module, data);
+											this.onChat(module, data);
 										} catch(Throwable t) {
-											System.err.println(module.getMessagePrefix() + " An error occured while handling chat.");
+											System.err.println("[" + module.getId() + "] An error occured while handling chat.");
 											t.printStackTrace();
 										}
 									}
 								}
 							}
 						} catch(Throwable t) {
-							System.err.println(module.getMessagePrefix() + " An error occured while updating the module.");
+							System.err.println("[" + module.getId() + "] An error occured while updating the module.");
 							t.printStackTrace();
 						}
 					} else {
@@ -109,59 +134,93 @@ public abstract class Bot {
 		}
 	}
 
+	/**
+	 * Gets whether the bot is currently running.
+	 * @return Whether the bot is currently running.
+	 */
 	public final boolean isRunning() {
 		return this.running;
 	}
 
+	/**
+	 * Stops the bot, halting execution.
+	 */
 	public final void stop() {
 		this.running = false;
 	}
 
+	/**
+	 * Gets the bot's command manager.
+	 * @return The bot's command manager.
+	 */
 	public final CommandManager getCommandManager() {
 		return this.commands;
 	}
 
+	/**
+	 * Gets a list of modules registered to the bot.
+	 * @return A list of modules registered to the bot.
+	 */
 	public final Collection<Module> getModules() {
 		return this.modules.values();
 	}
 
+	/**
+	 * Gets the module with the given ID.
+	 * @param id ID of the module.
+	 * @return The module with the given ID.
+	 */
 	public final Module getModule(String id) {
 		return this.modules.get(id);
 	}
 
-	public final Module addModule(String id, Module module) {
-		if(this.modules.containsKey(id)) {
-			this.removeModule(id);
+	/**
+	 * Adds a module to the bot.
+	 * @param module Module to add.
+	 * @return The added module, or null if adding the module failed.
+	 */
+	public final Module addModule(Module module) {
+		if(module == null) {
+			return null;
+		}
+
+		if(this.modules.containsKey(module.getId())) {
+			this.removeModule(module.getId());
 		}
 
 		try {
-			System.out.println(module.getMessagePrefix() + " Connecting module...");
+			System.out.println("[" + module.getId() + "] Connecting module...");
 			module.connect();
-			this.modules.put(id, module);
-			System.out.println(module.getMessagePrefix() + " Module connected.");
+			this.modules.put(module.getId(), module);
+			System.out.println("[" + module.getId() + "] Module connected.");
 
 			return module;
 		} catch(Throwable t) {
-			System.err.println(module.getMessagePrefix() + " An error occured while connecting the module.");
+			System.err.println("[" + module.getId() + "] An error occured while connecting the module.");
 			t.printStackTrace();
 
 			return null;
 		}
 	}
 
+	/**
+	 * Removes a module from the bot.
+	 * @param id ID of the module to remove.
+	 * @return The removed module.
+	 */
 	public final Module removeModule(String id) {
-		if(!this.modules.containsKey(id)) {
+		if(id == null || !this.modules.containsKey(id)) {
 			return null;
 		}
 
 		Module module = this.modules.get(id);
 		if(module.isConnected()) {
 			try {
-				System.out.println(module.getMessagePrefix() + " Disconnecting module...");
+				System.out.println("[" + module.getId() + "] Disconnecting module...");
 				module.disconnect("Module removed.");
-				System.out.println(module.getMessagePrefix() + " Module disconnected.");
+				System.out.println("[" + module.getId() + "] Module disconnected.");
 			} catch(Throwable t) {
-				System.err.println(module.getMessagePrefix() + " An error occured while disconnecting the module.");
+				System.err.println("[" + module.getId() + "] An error occured while disconnecting the module.");
 				t.printStackTrace();
 			}
 		}
