@@ -118,7 +118,7 @@ public class SkypeModule implements Module {
 
 	@Override
 	public String getMessagePrefix() {
-		return "[Skype - " + this.getUsername() + "]";
+		return "[Skype - " + this.getUsername() + " - " + this.chatId + "]";
 	}
 
 	@Override

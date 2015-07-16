@@ -82,7 +82,7 @@ public class SlackModule implements Module {
 
 	@Override
 	public String getMessagePrefix() {
-		return "[Slack - " + this.getUsername() + "]";
+		return "[Slack - " + this.getUsername() + " - " + this.channel + "]";
 	}
 
 	@Override

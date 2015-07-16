@@ -94,7 +94,7 @@ public class HipChatModule implements Module {
 
 	@Override
 	public String getMessagePrefix() {
-		return "[HipChat - " + this.getUsername() + "]";
+		return "[HipChat - " + this.getUsername() + " - " + this.room + "]";
 	}
 
 	@Override

@@ -131,7 +131,7 @@ public class MinecraftModule implements Module {
 
 	@Override
 	public String getMessagePrefix() {
-		return "[Minecraft - " + this.getUsername() + "]";
+		return "[Minecraft - " + this.getUsername() + " - " + this.host + ":" + this.port + "]";
 	}
 
 	@Override

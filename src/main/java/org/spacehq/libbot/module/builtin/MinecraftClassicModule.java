@@ -169,7 +169,7 @@ public class MinecraftClassicModule implements Module {
 
 	@Override
 	public String getMessagePrefix() {
-		return "[MinecraftClassic - " + this.getUsername() + "]";
+		return "[MinecraftClassic - " + this.username + " - " + (this.serverUrl != null ? this.serverUrl : (this.host + ":" + this.port)) + "]";
 	}
 
 	@Override

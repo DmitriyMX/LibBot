@@ -1,13 +1,10 @@
 package org.spacehq.libbot.module.builtin;
 
-import org.jibble.pircbot.IrcException;
-import org.jibble.pircbot.NickAlreadyInUseException;
 import org.jibble.pircbot.PircBot;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.module.ModuleException;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -80,7 +77,7 @@ public class IRCModule extends PircBot implements Module {
 
 	@Override
 	public String getMessagePrefix() {
-		return "[IRC - " + this.getUsername() + "]";
+		return "[IRC - " + this.getUsername() + " - " + this.channel + "]";
 	}
 
 	@Override
