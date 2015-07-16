@@ -3,6 +3,7 @@ package org.spacehq.libbot.module.builtin;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.module.ModuleException;
+import org.spacehq.libbot.util.Conditions;
 import org.spacehq.mc.auth.GameProfile;
 import org.spacehq.mc.auth.exception.AuthenticationException;
 import org.spacehq.mc.protocol.MinecraftProtocol;
@@ -36,17 +37,9 @@ public class MinecraftModule implements Module {
 	private List<Pattern> chatPatterns = new ArrayList<Pattern>();
 
 	public MinecraftModule(String host, int port, String username, String password) {
-		if(host == null || host.isEmpty()) {
-			throw new IllegalArgumentException("Host cannot be null or empty.");
-		}
-
-		if(username == null || username.isEmpty()) {
-			throw new IllegalArgumentException("Username cannot be null or empty.");
-		}
-
-		if(password == null || password.isEmpty()) {
-			throw new IllegalArgumentException("Password cannot be null or empty.");
-		}
+		Conditions.notNullOrEmpty(host, "Host");
+		Conditions.notNullOrEmpty(username, "Username");
+		Conditions.notNullOrEmpty(password, "Password");
 
 		this.host = host;
 		this.port = port;
@@ -90,6 +83,11 @@ public class MinecraftModule implements Module {
 	public MinecraftModule removeChatPattern(Pattern pattern) {
 		this.chatPatterns.remove(pattern);
 		return this;
+	}
+
+	@Override
+	public boolean isConnected() {
+		return this.conn != null && this.conn.getSession().isConnected();
 	}
 
 	@Override

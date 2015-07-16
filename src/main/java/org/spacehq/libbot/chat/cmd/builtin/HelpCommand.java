@@ -50,6 +50,6 @@ public class HelpCommand implements CommandExecutor {
 			build.append(" - ").append(commands.getPrefix()).append(aliases).append(" ").append(cmd.usage()).append(": ").append(cmd.desc()).append("\n");
 		}
 
-		source.chat(build.toString());
+		source.chat(build.toString().trim());
 	}
 }

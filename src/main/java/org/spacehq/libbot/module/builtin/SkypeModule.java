@@ -12,6 +12,7 @@ import com.samczsun.skype4j.formatting.Text;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.module.ModuleException;
+import org.spacehq.libbot.util.Conditions;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,21 +31,18 @@ public class SkypeModule implements Module {
 	private long startTime;
 
 	public SkypeModule(String username, String password, String chatId) {
-		if(username == null || username.isEmpty()) {
-			throw new IllegalArgumentException("Username cannot be null or empty.");
-		}
-
-		if(password == null || password.isEmpty()) {
-			throw new IllegalArgumentException("Password cannot be null or empty.");
-		}
-
-		if(chatId == null || chatId.isEmpty()) {
-			throw new IllegalArgumentException("Chat ID cannot be null or empty.");
-		}
+		Conditions.notNullOrEmpty(username, "Username");
+		Conditions.notNullOrEmpty(password, "Password");
+		Conditions.notNullOrEmpty(chatId, "Chat ID");
 
 		this.username = username;
 		this.password = password;
 		this.chatId = chatId;
+	}
+
+	@Override
+	public boolean isConnected() {
+		return this.skype != null && this.chat != null;
 	}
 
 	@Override
@@ -95,6 +93,7 @@ public class SkypeModule implements Module {
 			try {
 				this.skype.logout();
 			} catch(IOException e) {
+				throw new ModuleException("Failed to disconnect Skype module.", e);
 			}
 		}
 
@@ -132,7 +131,6 @@ public class SkypeModule implements Module {
 	public void chat(String message) {
 		if(this.skype != null && this.chat != null) {
 			try {
-				IllegalArgumentException e;
 				receive(this.chat.sendMessage(Message.create().with(Text.plain(message))));
 			} catch(IllegalArgumentException e) {
 				// TODO: Stop this from happening ("User must not be null" internally). Until then, swallow these exceptions.

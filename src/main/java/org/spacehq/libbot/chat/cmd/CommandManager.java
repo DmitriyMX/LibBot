@@ -18,6 +18,7 @@ public class CommandManager {
 	private CommandParser parser = new SpacedCommandParser();
 	private PermissionManager permManager = new EmptyPermissionManager();
 	private boolean multiThreaded = false;
+	private boolean acceptCommandsFromSelf = false;
 	private String prefix = "#";
 	private String unknownCommandFormat = "Unknown command \"%1$s\", %2$s.";
 	private String noPermissionFormat = "You don't have permission to use \"%1$s\", %2$s.";
@@ -46,6 +47,14 @@ public class CommandManager {
 
 	public void setMultiThreaded(boolean multiThreaded) {
 		this.multiThreaded = multiThreaded;
+	}
+
+	public boolean getAcceptCommandsFromSelf() {
+		return this.acceptCommandsFromSelf;
+	}
+
+	public void setAcceptCommandsFromSelf(boolean accept) {
+		this.acceptCommandsFromSelf = accept;
 	}
 
 	public String getPrefix() {

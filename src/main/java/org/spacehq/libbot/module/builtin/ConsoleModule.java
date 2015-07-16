@@ -3,6 +3,7 @@ package org.spacehq.libbot.module.builtin;
 import org.spacehq.libbot.Bot;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
+import org.spacehq.libbot.util.Conditions;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,25 +13,30 @@ import java.util.List;
 
 public class ConsoleModule implements Module {
 	private List<ChatData> incoming = new ArrayList<ChatData>();
-	private ConsoleReader reader = new ConsoleReader();
+	private Thread thread;
 	private Bot bot;
 
 	public ConsoleModule(Bot bot) {
-		if(bot == null) {
-			throw new IllegalArgumentException("Bot cannot be null.");
-		}
+		Conditions.notNull(bot, "Bot");
 
 		this.bot = bot;
 	}
 
 	@Override
+	public boolean isConnected() {
+		return this.thread != null;
+	}
+
+	@Override
 	public void connect() {
-		new Thread(this.reader, "ConsoleReader").start();
+		this.thread = new Thread(new ConsoleReader(), "ConsoleReader");
+		this.thread.start();
 	}
 
 	@Override
 	public void disconnect(String reason) {
-		this.reader.stopReading();
+		this.thread.interrupt();
+		this.thread = null;
 	}
 
 	@Override
@@ -45,7 +51,7 @@ public class ConsoleModule implements Module {
 
 	@Override
 	public String getMessagePrefix() {
-		return "[" + this.getUsername() + "]";
+		return "[Console]";
 	}
 
 	@Override
@@ -74,7 +80,7 @@ public class ConsoleModule implements Module {
 		@Override
 		public void run() {
 			BufferedReader read = new BufferedReader(new InputStreamReader(System.in));
-			while(this.reading) {
+			while(true) {
 				try {
 					if(read.ready()) {
 						String line = read.readLine();
@@ -87,6 +93,7 @@ public class ConsoleModule implements Module {
 						try {
 							Thread.sleep(100);
 						} catch(InterruptedException e) {
+							break;
 						}
 					}
 				} catch(IOException e) {

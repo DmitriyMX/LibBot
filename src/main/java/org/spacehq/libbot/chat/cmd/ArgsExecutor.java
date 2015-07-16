@@ -19,6 +19,11 @@ public class ArgsExecutor implements Module {
 	}
 
 	@Override
+	public boolean isConnected() {
+		return true;
+	}
+
+	@Override
 	public void connect() {
 	}
 

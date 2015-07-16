@@ -6,6 +6,7 @@ import com.google.gson.JsonObject;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.module.ModuleException;
+import org.spacehq.libbot.util.Conditions;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,21 +33,18 @@ public class HipChatModule implements Module {
 	private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
 
 	public HipChatModule(String token, String room, String username) {
-		if(token == null || token.isEmpty()) {
-			throw new IllegalArgumentException("Token cannot be null or empty.");
-		}
-
-		if(room == null || room.isEmpty()) {
-			throw new IllegalArgumentException("Room cannot be null or empty.");
-		}
-
-		if(username == null || username.isEmpty()) {
-			throw new IllegalArgumentException("Username cannot be null or empty.");
-		}
+		Conditions.notNullOrEmpty(token, "Token");
+		Conditions.notNullOrEmpty(room, "Room");
+		Conditions.notNullOrEmpty(username, "Username");
 
 		this.token = token;
 		this.room = room;
 		this.username = username;
+	}
+
+	@Override
+	public boolean isConnected() {
+		return this.roomId != null;
 	}
 
 	@Override
@@ -85,9 +83,7 @@ public class HipChatModule implements Module {
 
 	@Override
 	public void setUsername(String name) {
-		if(name == null || name.isEmpty()) {
-			throw new IllegalArgumentException("Username cannot be null or empty.");
-		}
+		Conditions.notNullOrEmpty(name, "Username");
 
 		this.username = name;
 	}

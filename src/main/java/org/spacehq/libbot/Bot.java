@@ -4,17 +4,25 @@ import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.chat.cmd.CommandManager;
 import org.spacehq.libbot.module.Module;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 public abstract class Bot {
 	private boolean running = true;
-	private boolean acceptSelfCommands;
 	private final CommandManager commands = new CommandManager();
 	private final Map<String, Module> modules = new LinkedHashMap<String, Module>();
 
-	public final void start(String args[], boolean acceptSelfCommands) {
-		this.acceptSelfCommands = acceptSelfCommands;
-		this.initBot(args);
+	public final void start(String args[]) {
+		try {
+			this.initBot(args);
+		} catch(Throwable t) {
+			System.err.println("[Bot] An error occured while initializing the bot.");
+			t.printStackTrace();
+			return;
+		}
+
 		this.run();
 	}
 
@@ -28,59 +36,75 @@ public abstract class Bot {
 
 	private final void run() {
 		while(this.running) {
-			for(String id : this.modules.keySet()) {
-				Module module = this.modules.get(id);
-				try {
-					module.update();
-					List<ChatData> chat = module.getIncomingChat();
-					for(ChatData data : chat) {
-						if(data != null) {
-							System.out.println(module.getMessagePrefix() + " " + data.getUser() + ": " + data.getMessage());
-							if(data.getMessage().startsWith(this.commands.getPrefix())) {
-								if(this.acceptSelfCommands || !data.getUser().equals(module.getUsername())) {
-									if(this.onCommand(id, module, data)) {
+			try {
+				for(String id : this.modules.keySet()) {
+					Module module = this.modules.get(id);
+					if(module.isConnected()) {
+						try {
+							module.update();
+							List<ChatData> chat = module.getIncomingChat();
+							for(ChatData data : chat) {
+								if(data != null) {
+									System.out.println(module.getMessagePrefix() + " " + data.getUser() + ": " + data.getMessage());
+									if(data.getMessage().startsWith(this.commands.getPrefix()) && (this.commands.getAcceptCommandsFromSelf() || !data.getUser().equals(module.getUsername()))) {
+										boolean execute = false;
 										try {
-											this.commands.execute(module, data);
-										} catch(Exception e) {
-											System.err.println(module.getMessagePrefix() + " An error occured while executing a command.");
-											e.printStackTrace();
+											execute = this.onCommand(id, module, data);
+										} catch(Throwable t) {
+											System.err.println(module.getMessagePrefix() + " An error occured while handling a command.");
+											t.printStackTrace();
+										}
+
+										if(execute) {
+											try {
+												this.commands.execute(module, data);
+											} catch(Exception e) {
+												System.err.println(module.getMessagePrefix() + " An error occured while executing a command.");
+												e.printStackTrace();
+											}
+										}
+									} else {
+										try {
+											this.onChat(id, module, data);
+										} catch(Throwable t) {
+											System.err.println(module.getMessagePrefix() + " An error occured while handling chat.");
+											t.printStackTrace();
 										}
 									}
 								}
-							} else {
-								this.onChat(id, module, data);
 							}
+						} catch(Throwable t) {
+							System.err.println(module.getMessagePrefix() + " An error occured while updating the module.");
+							t.printStackTrace();
 						}
+					} else {
+						this.removeModule(id);
 					}
-				} catch(Exception e) {
-					System.err.println(module.getMessagePrefix() + " An error occured while updating the module.");
-					e.printStackTrace();
 				}
-			}
-
-			try {
-				Thread.sleep(50);
-			} catch(InterruptedException e) {
+			} catch(Throwable t) {
+				System.err.println("[Bot] An error occured while updating modules.");
+				t.printStackTrace();
 			}
 		}
 
-		this.shutdown();
+		try {
+			this.shutdown();
+		} catch(Throwable t) {
+			System.err.println("[Bot] An error occured while shutting down the bot.");
+			t.printStackTrace();
+		}
 	}
 
 	private final void shutdown() {
 		this.running = false;
-		this.shutdownBot();
-		for(String id : this.modules.keySet()) {
-			Module module = this.getModule(id);
-			System.out.println(module.getMessagePrefix() + " Disconnecting module...");
-			try {
-				module.disconnect("Bot shutting down.");
-				System.out.println(module.getMessagePrefix() + " Module disconnected.");
-			} catch(Exception e) {
-				System.err.println(module.getMessagePrefix() + " An error occured while disconnecting the module.");
-				e.printStackTrace();
-			}
+		try {
+			this.shutdownBot();
+		} catch(Throwable t) {
+			System.err.println("[Bot] An error occured while handling bot shutdown.");
+			t.printStackTrace();
+		}
 
+		for(String id : this.modules.keySet()) {
 			this.removeModule(id);
 		}
 	}
@@ -97,8 +121,8 @@ public abstract class Bot {
 		return this.commands;
 	}
 
-	public final List<Module> getModules() {
-		return new ArrayList<Module>(this.modules.values());
+	public final Collection<Module> getModules() {
+		return this.modules.values();
 	}
 
 	public final Module getModule(String id) {
@@ -117,15 +141,31 @@ public abstract class Bot {
 			System.out.println(module.getMessagePrefix() + " Module connected.");
 
 			return module;
-		} catch(Exception e) {
+		} catch(Throwable t) {
 			System.err.println(module.getMessagePrefix() + " An error occured while connecting the module.");
-			e.printStackTrace();
+			t.printStackTrace();
 
 			return null;
 		}
 	}
 
 	public final Module removeModule(String id) {
+		if(!this.modules.containsKey(id)) {
+			return null;
+		}
+
+		Module module = this.modules.get(id);
+		if(module.isConnected()) {
+			try {
+				System.out.println(module.getMessagePrefix() + " Disconnecting module...");
+				module.disconnect("Module removed.");
+				System.out.println(module.getMessagePrefix() + " Module disconnected.");
+			} catch(Throwable t) {
+				System.err.println(module.getMessagePrefix() + " An error occured while disconnecting the module.");
+				t.printStackTrace();
+			}
+		}
+
 		return this.modules.remove(id);
 	}
 }

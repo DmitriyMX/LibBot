@@ -16,11 +16,12 @@ public class ExampleBot extends Bot {
 	private static final boolean HIP_CHAT = true;
 
 	public static void main(String args[]) {
-		new ExampleBot().start(args, true);
+		new ExampleBot().start(args);
 	}
 
 	@Override
 	public void initBot(String[] args) {
+		this.getCommandManager().setAcceptCommandsFromSelf(true);
 		this.getCommandManager().setPrefix("#");
 		this.getCommandManager().setParser(new SpacedCommandParser());
 		this.getCommandManager().register(new HelpCommand(10));

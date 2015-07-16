@@ -3,6 +3,7 @@ package org.spacehq.libbot.module.builtin;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.module.ModuleException;
+import org.spacehq.libbot.util.Conditions;
 import org.spacehq.mc.classic.protocol.AuthenticationException;
 import org.spacehq.mc.classic.protocol.ClassicProtocol;
 import org.spacehq.mc.classic.protocol.data.serverlist.ServerList;
@@ -42,17 +43,9 @@ public class MinecraftClassicModule implements Module {
 	public MinecraftClassicModule(String username, String password, String serverUrl) {
 		this();
 
-		if(username == null || username.isEmpty()) {
-			throw new IllegalArgumentException("Username cannot be null or empty.");
-		}
-
-		if(password == null || password.isEmpty()) {
-			throw new IllegalArgumentException("Password cannot be null or empty.");
-		}
-
-		if(serverUrl == null || serverUrl.isEmpty()) {
-			throw new IllegalArgumentException("Server URL cannot be null or empty.");
-		}
+		Conditions.notNullOrEmpty(username, "Username");
+		Conditions.notNullOrEmpty(password, "Password");
+		Conditions.notNullOrEmpty(serverUrl, "Server URL");
 
 		this.username = username;
 		this.password = password;
@@ -62,17 +55,9 @@ public class MinecraftClassicModule implements Module {
 	public MinecraftClassicModule(String username, String verificationKey, String host, int port) {
 		this();
 
-		if(username == null || username.isEmpty()) {
-			throw new IllegalArgumentException("Username cannot be null or empty.");
-		}
-
-		if(verificationKey == null || verificationKey.isEmpty()) {
-			throw new IllegalArgumentException("Verification Key cannot be null or empty.");
-		}
-
-		if(host == null || host.isEmpty()) {
-			throw new IllegalArgumentException("Host cannot be null or empty.");
-		}
+		Conditions.notNullOrEmpty(username, "Username");
+		Conditions.notNullOrEmpty(verificationKey, "Verification Key");
+		Conditions.notNullOrEmpty(host, "Host");
 
 		this.username = username;
 		this.verificationKey = verificationKey;
@@ -113,6 +98,11 @@ public class MinecraftClassicModule implements Module {
 	public MinecraftClassicModule removeChatPattern(Pattern pattern) {
 		this.chatPatterns.remove(pattern);
 		return this;
+	}
+
+	@Override
+	public boolean isConnected() {
+		return this.conn != null && this.conn.getSession().isConnected();
 	}
 
 	@Override
@@ -169,7 +159,15 @@ public class MinecraftClassicModule implements Module {
 
 	@Override
 	public String getMessagePrefix() {
-		return "[MinecraftClassic - " + this.username + " - " + (this.serverUrl != null ? this.serverUrl : (this.host + ":" + this.port)) + "]";
+		String server = "";
+		if(this.serverUrl != null) {
+			int end = this.serverUrl.endsWith("/") ? this.serverUrl.length() - 2 : this.serverUrl.length() - 1;
+			server = this.serverUrl.substring(this.serverUrl.lastIndexOf("/", end), end);
+		} else {
+			server = this.host + ":" + this.port;
+		}
+
+		return "[MinecraftClassic - " + this.username + " - " + server + "]";
 	}
 
 	@Override

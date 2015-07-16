@@ -4,6 +4,7 @@ import com.google.gson.*;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.module.ModuleException;
+import org.spacehq.libbot.util.Conditions;
 import org.spacehq.libbot.util.HtmlEscaping;
 
 import java.io.IOException;
@@ -30,21 +31,18 @@ public class SlackModule implements Module {
 	private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
 
 	public SlackModule(String token, String channel, String username) {
-		if(token == null || token.isEmpty()) {
-			throw new IllegalArgumentException("Token cannot be null or empty.");
-		}
-
-		if(channel == null || channel.isEmpty()) {
-			throw new IllegalArgumentException("Channel cannot be null or empty.");
-		}
-
-		if(username == null || username.isEmpty()) {
-			throw new IllegalArgumentException("Username cannot be null or empty.");
-		}
+		Conditions.notNullOrEmpty(token, "Token");
+		Conditions.notNullOrEmpty(channel, "Channel");
+		Conditions.notNullOrEmpty(username, "Username");
 
 		this.token = token;
 		this.channel = channel;
 		this.username = username;
+	}
+
+	@Override
+	public boolean isConnected() {
+		return this.channelId != null;
 	}
 
 	@Override
@@ -73,9 +71,7 @@ public class SlackModule implements Module {
 
 	@Override
 	public void setUsername(String name) {
-		if(name == null || name.isEmpty()) {
-			throw new IllegalArgumentException("Username cannot be null or empty.");
-		}
+		Conditions.notNullOrEmpty(name, "Username");
 
 		this.username = name;
 	}

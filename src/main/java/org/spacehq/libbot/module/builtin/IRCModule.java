@@ -4,6 +4,7 @@ import org.jibble.pircbot.PircBot;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.module.ModuleException;
+import org.spacehq.libbot.util.Conditions;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,17 +16,9 @@ public class IRCModule extends PircBot implements Module {
 	private List<ChatData> incoming = new ArrayList<ChatData>();
 
 	public IRCModule(String username, String host, String channel) {
-		if(username == null || username.isEmpty()) {
-			throw new IllegalArgumentException("Username cannot be null or empty.");
-		}
-
-		if(host == null || host.isEmpty()) {
-			throw new IllegalArgumentException("Host cannot be null or empty.");
-		}
-
-		if(channel == null || channel.isEmpty()) {
-			throw new IllegalArgumentException("Channel cannot be null or empty.");
-		}
+		Conditions.notNullOrEmpty(username, "Username");
+		Conditions.notNullOrEmpty(host, "Host");
+		Conditions.notNullOrEmpty(channel, "Channel");
 
 		this.setName(username);
 		this.host = host;
@@ -68,9 +61,7 @@ public class IRCModule extends PircBot implements Module {
 
 	@Override
 	public void setUsername(String name) {
-		if(name == null || name.isEmpty()) {
-			throw new IllegalArgumentException("Username cannot be null or empty.");
-		}
+		Conditions.notNullOrEmpty(name, "Username");
 
 		this.changeNick(name);
 	}

@@ -5,6 +5,8 @@ import org.spacehq.libbot.chat.ChatData;
 import java.util.List;
 
 public interface Module {
+	public boolean isConnected();
+
 	public void connect();
 
 	public void disconnect(String reason);
