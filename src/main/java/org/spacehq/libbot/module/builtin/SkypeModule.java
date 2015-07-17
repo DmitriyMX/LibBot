@@ -1,15 +1,18 @@
 package org.spacehq.libbot.module.builtin;
 
 import com.samczsun.skype4j.Skype;
+import com.samczsun.skype4j.SkypeBuilder;
 import com.samczsun.skype4j.chat.Chat;
 import com.samczsun.skype4j.chat.ChatMessage;
 import com.samczsun.skype4j.events.EventHandler;
 import com.samczsun.skype4j.events.Listener;
+import com.samczsun.skype4j.events.chat.DisconnectedEvent;
 import com.samczsun.skype4j.events.chat.message.MessageEditedByOtherEvent;
 import com.samczsun.skype4j.events.chat.message.MessageEditedEvent;
 import com.samczsun.skype4j.events.chat.message.MessageReceivedEvent;
 import com.samczsun.skype4j.formatting.Message;
 import com.samczsun.skype4j.formatting.Text;
+import com.samczsun.skype4j.internal.SkypeImpl;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.BotException;
 import org.spacehq.libbot.module.Module;
@@ -19,15 +22,26 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Handler;
+import java.util.logging.Logger;
 
 /**
  * Module for connecting to a Skype chat.
  */
 public class SkypeModule implements Module {
+    static {
+        Logger logger = Logger.getLogger("webskype");
+        logger.setUseParentHandlers(false);
+        for(Handler handler : logger.getHandlers()) {
+            logger.removeHandler(handler);
+        }
+    }
+
     private String id;
     private String username;
     private String password;
     private String chatId;
+    private boolean autoReconnect;
 
     private Skype skype;
     private Chat chat;
@@ -44,6 +58,19 @@ public class SkypeModule implements Module {
      * @param chatId   ID of the chat to connect to.
      */
     public SkypeModule(String id, String username, String password, String chatId) {
+        this(id, username, password, chatId, true);
+    }
+
+    /**
+     * Creates a new SkypeModule instance.
+     *
+     * @param id            ID of the module.
+     * @param username      Username to connect with.
+     * @param password      Password to connect with.
+     * @param chatId        ID of the chat to connect to.
+     * @param autoReconnect Whether to automatically reconnect if disconnected by Skype.
+     */
+    public SkypeModule(String id, String username, String password, String chatId, boolean autoReconnect) {
         Conditions.notNullOrEmpty(id, "Id");
         Conditions.notNullOrEmpty(username, "Username");
         Conditions.notNullOrEmpty(password, "Password");
@@ -53,6 +80,7 @@ public class SkypeModule implements Module {
         this.username = username;
         this.password = password;
         this.chatId = chatId;
+        this.autoReconnect = autoReconnect;
     }
 
     @Override
@@ -67,10 +95,9 @@ public class SkypeModule implements Module {
 
     @Override
     public void connect() {
-        this.chat = null;
-
         try {
-            this.skype = Skype.login(this.username, this.password);
+            this.skype = new SkypeBuilder(this.username, this.password).build();
+            ((SkypeImpl) this.skype).login();
             this.skype.subscribe();
 
             this.chat = this.skype.getChat(this.chatId);
@@ -81,18 +108,35 @@ public class SkypeModule implements Module {
             this.startTime = System.currentTimeMillis();
             this.skype.getEventDispatcher().registerListener(new Listener() {
                 @EventHandler
-                public void onMessageReceived(MessageReceivedEvent e) {
-                    receive(e.getMessage(), e.getMessage().getMessage().asPlaintext());
+                public void onMessageReceived(MessageReceivedEvent event) {
+                    receive(event.getMessage(), event.getMessage().getMessage().asPlaintext());
                 }
 
                 @EventHandler
-                public void onMessageEdited(MessageEditedEvent e) {
-                    receive(e.getMessage(), e.getMessage().getMessage().asPlaintext());
+                public void onMessageEdited(MessageEditedEvent event) {
+                    receive(event.getMessage(), event.getNewContent());
                 }
 
                 @EventHandler
-                public void onMessageEditedByOther(MessageEditedByOtherEvent e) {
-                    receive(e.getMessage(), e.getNewContent());
+                public void onMessageEditedByOther(MessageEditedByOtherEvent event) {
+                    receive(event.getMessage(), event.getNewContent());
+                }
+
+                @EventHandler
+                public void onDisconnected(DisconnectedEvent event) {
+                    if(autoReconnect) {
+                        try {
+                            connect();
+                        } catch(BotException e) {
+                            System.err.println("[" + getId() + "] Failed to reconnect Skype module.");
+                            e.printStackTrace();
+                        }
+                    } else {
+                        try {
+                            disconnect("Disconnected: " + event.getCause());
+                        } catch(BotException e) {
+                        }
+                    }
                 }
             });
         } catch(BotException e) {
@@ -116,10 +160,10 @@ public class SkypeModule implements Module {
 
             try {
                 this.skype.logout();
-                this.skype = null;
             } catch(IOException e) {
-                this.skype = null;
                 throw new BotException("Failed to disconnect Skype module.", e);
+            } finally {
+                this.skype = null;
             }
         }
     }
