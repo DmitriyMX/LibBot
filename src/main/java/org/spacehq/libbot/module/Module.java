@@ -64,9 +64,4 @@ public interface Module {
      * @param message Message to send.
      */
     public void chat(String message);
-
-    /**
-     * Updates the module.
-     */
-    public void update();
 }

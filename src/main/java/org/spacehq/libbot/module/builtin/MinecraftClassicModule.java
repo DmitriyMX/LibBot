@@ -231,10 +231,6 @@ public class MinecraftClassicModule implements Module {
         }
     }
 
-    @Override
-    public void update() {
-    }
-
     private class BotListener extends SessionAdapter {
         @Override
         public void packetReceived(PacketReceivedEvent event) {

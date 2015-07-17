@@ -160,8 +160,4 @@ public class SkypeModule implements Module {
             throw new BotException("Module not connected.");
         }
     }
-
-    @Override
-    public void update() {
-    }
 }

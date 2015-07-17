@@ -108,10 +108,6 @@ public class IRCModule extends PircBot implements Module {
     }
 
     @Override
-    public void update() {
-    }
-
-    @Override
     public void onMessage(String channel, String sender, String login, String hostname, String message) {
         this.incoming.add(new ChatData(sender, message));
     }

@@ -72,6 +72,8 @@ public class SlackModule implements Module {
     public void connect() {
         this.channelId = this.call("channels.join", "name", this.channel).get("channel").getAsJsonObject().get("id").getAsString();
         this.lastReceived = System.currentTimeMillis() / 1000.0;
+
+        new Thread(new SlackUpdater()).start();
     }
 
     @Override
@@ -115,48 +117,6 @@ public class SlackModule implements Module {
         }
     }
 
-    @Override
-    public void update() {
-        if(this.channelId == null) {
-            return;
-        }
-
-        this.users.clear();
-        JsonObject users = this.call("users.list");
-        for(JsonElement e : users.get("members").getAsJsonArray()) {
-            JsonObject member = e.getAsJsonObject();
-            this.users.put(member.get("id").getAsString(), member.get("name").getAsString());
-        }
-
-        JsonObject history = this.call("channels.history", "channel", this.channelId, "count", String.valueOf(10));
-        double latest = this.lastReceived;
-        JsonArray messages = history.get("messages").getAsJsonArray();
-        for(int index = messages.size() - 1; index >= 0; index--) {
-            JsonObject message = messages.get(index).getAsJsonObject();
-            if(message.has("message")) {
-                message = message.get("message").getAsJsonObject();
-            }
-
-            if(message.get("type").getAsString().equals("message")) {
-                String user = message.has("user") ? message.get("user").getAsString() : message.get("username").getAsString();
-                double timestamp = message.get("ts").getAsDouble();
-                String text = HtmlEscaping.unescape(message.get("text").getAsString()).replaceAll("<@U(\\w+)\\|(\\w+)>", "$2");
-                if(timestamp > this.lastReceived) {
-                    this.incoming.add(new ChatData(this.users.containsKey(user) ? this.users.get(user) : user, text));
-                    if(timestamp > latest) {
-                        latest = timestamp;
-                    }
-                }
-            }
-        }
-
-        this.lastReceived = latest;
-        try {
-            Thread.sleep(500);
-        } catch(InterruptedException e) {
-        }
-    }
-
     private JsonObject call(String method, String... params) {
         InputStream in = null;
         try {
@@ -181,6 +141,48 @@ public class SlackModule implements Module {
                 try {
                     in.close();
                 } catch(IOException e) {
+                }
+            }
+        }
+    }
+
+    private class SlackUpdater implements Runnable {
+        private long lastUpdate;
+
+        @Override
+        public void run() {
+            while(isConnected()) {
+                if(System.currentTimeMillis() - this.lastUpdate >= 1000) {
+                    users.clear();
+                    for(JsonElement e : call("users.list").get("members").getAsJsonArray()) {
+                        JsonObject member = e.getAsJsonObject();
+                        users.put(member.get("id").getAsString(), member.get("name").getAsString());
+                    }
+
+                    JsonObject history = call("channels.history", "channel", channelId, "count", String.valueOf(10));
+                    double latest = lastReceived;
+                    JsonArray messages = history.get("messages").getAsJsonArray();
+                    for(int index = messages.size() - 1; index >= 0; index--) {
+                        JsonObject message = messages.get(index).getAsJsonObject();
+                        if(message.has("message")) {
+                            message = message.get("message").getAsJsonObject();
+                        }
+
+                        if(message.get("type").getAsString().equals("message")) {
+                            String user = message.has("user") ? message.get("user").getAsString() : message.get("username").getAsString();
+                            double timestamp = message.get("ts").getAsDouble();
+                            String text = HtmlEscaping.unescape(message.get("text").getAsString()).replaceAll("<@U(\\w+)\\|(\\w+)>", "$2");
+                            if(timestamp > lastReceived) {
+                                incoming.add(new ChatData(users.containsKey(user) ? users.get(user) : user, text));
+                                if(timestamp > latest) {
+                                    latest = timestamp;
+                                }
+                            }
+                        }
+                    }
+
+                    lastReceived = latest;
+                    this.lastUpdate = System.currentTimeMillis();
                 }
             }
         }

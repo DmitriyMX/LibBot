@@ -79,10 +79,6 @@ public class ConsoleModule implements Module {
         System.out.println(message);
     }
 
-    @Override
-    public void update() {
-    }
-
     private class ConsoleReader implements Runnable {
         private boolean reading = true;
 

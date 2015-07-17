@@ -36,6 +36,8 @@ public class HipChatModule implements Module {
     private long lastReceived;
     private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
 
+    private long lastUpdate;
+
     /**
      * Creates a new HipChatModule instance.
      *
@@ -82,6 +84,8 @@ public class HipChatModule implements Module {
         }
 
         this.lastReceived = System.currentTimeMillis();
+
+        new Thread(new HipChatUpdater()).start();
     }
 
     @Override
@@ -123,43 +127,6 @@ public class HipChatModule implements Module {
         }
     }
 
-    @Override
-    public void update() {
-        if(this.roomId == null) {
-            return;
-        }
-
-        JsonObject history = this.call("rooms/history", "room_id", this.roomId, "date", "recent", "timezone", Calendar.getInstance().getTimeZone().getID());
-        long latest = this.lastReceived;
-        for(JsonElement e : history.get("messages").getAsJsonArray()) {
-            JsonObject message = e.getAsJsonObject();
-            String user = message.get("from").getAsJsonObject().get("name").getAsString();
-            String date = message.get("date").getAsString().replace("T", " ");
-            long timestamp;
-            try {
-                int end = date.contains("+") ? date.lastIndexOf("+") : date.contains("-") ? date.lastIndexOf("-") : date.length();
-                timestamp = DATE_FORMAT.parse(date.substring(0, end)).getTime();
-            } catch(ParseException e1) {
-                throw new BotException("Failed to parse date.", e1);
-            }
-
-            String text = message.get("message").getAsString();
-            if(timestamp > this.lastReceived) {
-                this.incoming.add(new ChatData(user, text));
-                if(timestamp > latest) {
-                    latest = timestamp;
-                }
-            }
-        }
-
-        this.lastReceived = latest;
-        // Make sure we don't get rate limited by limiting updates to 50 out of 100 requests per 5 minutes. The other 50 can be used for chatting, etc.
-        try {
-            Thread.sleep(6000);
-        } catch(InterruptedException e) {
-        }
-    }
-
     private JsonObject call(String method, String... params) {
         InputStream in = null;
         try {
@@ -178,6 +145,44 @@ public class HipChatModule implements Module {
                 try {
                     in.close();
                 } catch(IOException e) {
+                }
+            }
+        }
+    }
+
+    private class HipChatUpdater implements Runnable {
+        private long lastUpdate;
+
+        @Override
+        public void run() {
+            while(isConnected()) {
+                // Make sure we don't get rate limited by limiting updates to 50 out of 100 requests per 5 minutes. The other 50 can be used for chatting, etc.
+                if(System.currentTimeMillis() - this.lastUpdate >= 6000) {
+                    JsonObject history = call("rooms/history", "room_id", roomId, "date", "recent", "timezone", Calendar.getInstance().getTimeZone().getID());
+                    long latest = lastReceived;
+                    for(JsonElement e : history.get("messages").getAsJsonArray()) {
+                        JsonObject message = e.getAsJsonObject();
+                        String user = message.get("from").getAsJsonObject().get("name").getAsString();
+                        String date = message.get("date").getAsString().replace("T", " ");
+                        long timestamp;
+                        try {
+                            int end = date.contains("+") ? date.lastIndexOf("+") : date.contains("-") ? date.lastIndexOf("-") : date.length();
+                            timestamp = DATE_FORMAT.parse(date.substring(0, end)).getTime();
+                        } catch(ParseException e1) {
+                            throw new BotException("Failed to parse date.", e1);
+                        }
+
+                        String text = message.get("message").getAsString();
+                        if(timestamp > lastReceived) {
+                            incoming.add(new ChatData(user, text));
+                            if(timestamp > latest) {
+                                latest = timestamp;
+                            }
+                        }
+                    }
+
+                    lastReceived = latest;
+                    this.lastUpdate = System.currentTimeMillis();
                 }
             }
         }

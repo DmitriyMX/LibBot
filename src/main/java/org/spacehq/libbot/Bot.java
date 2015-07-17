@@ -26,7 +26,7 @@ public abstract class Bot {
         try {
             this.initBot(args);
         } catch(Throwable t) {
-            System.err.println("[Bot] An error occured while initializing the bot.");
+            System.err.println("[Bot] An error occurred while initializing the bot.");
             t.printStackTrace();
             return;
         }
@@ -70,7 +70,6 @@ public abstract class Bot {
                     Module module = this.modules.get(id);
                     if(module.isConnected()) {
                         try {
-                            module.update();
                             List<ChatData> chat = module.getIncomingChat();
                             for(ChatData data : chat) {
                                 if(data != null) {
@@ -80,7 +79,7 @@ public abstract class Bot {
                                         try {
                                             execute = this.onCommand(module, data);
                                         } catch(Throwable t) {
-                                            System.err.println("[" + module.getId() + "] An error occured while handling a command.");
+                                            System.err.println("[" + module.getId() + "] An error occurred while handling a command.");
                                             t.printStackTrace();
                                         }
 
@@ -88,7 +87,7 @@ public abstract class Bot {
                                             try {
                                                 this.commands.execute(module, data);
                                             } catch(Exception e) {
-                                                System.err.println("[" + module.getId() + "] An error occured while executing a command.");
+                                                System.err.println("[" + module.getId() + "] An error occurred while executing a command.");
                                                 e.printStackTrace();
                                             }
                                         }
@@ -96,14 +95,14 @@ public abstract class Bot {
                                         try {
                                             this.onChat(module, data);
                                         } catch(Throwable t) {
-                                            System.err.println("[" + module.getId() + "] An error occured while handling chat.");
+                                            System.err.println("[" + module.getId() + "] An error occurred while handling chat.");
                                             t.printStackTrace();
                                         }
                                     }
                                 }
                             }
                         } catch(Throwable t) {
-                            System.err.println("[" + module.getId() + "] An error occured while updating the module.");
+                            System.err.println("[" + module.getId() + "] An error occurred while handling chat.");
                             t.printStackTrace();
                         }
                     } else {
@@ -111,7 +110,7 @@ public abstract class Bot {
                     }
                 }
             } catch(Throwable t) {
-                System.err.println("[Bot] An error occured while updating modules.");
+                System.err.println("[Bot] An error occurred while updating modules.");
                 t.printStackTrace();
             }
         }
@@ -119,7 +118,7 @@ public abstract class Bot {
         try {
             this.shutdown();
         } catch(Throwable t) {
-            System.err.println("[Bot] An error occured while shutting down the bot.");
+            System.err.println("[Bot] An error occurred while shutting down the bot.");
             t.printStackTrace();
         }
     }
@@ -129,7 +128,7 @@ public abstract class Bot {
         try {
             this.shutdownBot();
         } catch(Throwable t) {
-            System.err.println("[Bot] An error occured while handling bot shutdown.");
+            System.err.println("[Bot] An error occurred while handling bot shutdown.");
             t.printStackTrace();
         }
 
@@ -205,7 +204,7 @@ public abstract class Bot {
 
             return module;
         } catch(Throwable t) {
-            System.err.println("[" + module.getId() + "] An error occured while connecting the module.");
+            System.err.println("[" + module.getId() + "] An error occurred while connecting the module.");
             t.printStackTrace();
 
             return null;
@@ -230,7 +229,7 @@ public abstract class Bot {
                 module.disconnect("Module removed.");
                 System.out.println("[" + module.getId() + "] Module disconnected.");
             } catch(Throwable t) {
-                System.err.println("[" + module.getId() + "] An error occured while disconnecting the module.");
+                System.err.println("[" + module.getId() + "] An error occurred while disconnecting the module.");
                 t.printStackTrace();
             }
         }
