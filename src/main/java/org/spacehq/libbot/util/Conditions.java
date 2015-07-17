@@ -8,7 +8,8 @@ import org.spacehq.libbot.module.BotException;
 public class Conditions {
     /**
      * Throws an exception if the given object is null.
-     * @param o Object to check.
+     *
+     * @param o    Object to check.
      * @param name Name to use in the exception.
      * @throws BotException if the given object is null.
      */
@@ -20,7 +21,8 @@ public class Conditions {
 
     /**
      * Throws an exception if the given string is null or empty.
-     * @param s String to check.
+     *
+     * @param s    String to check.
      * @param name Name to use in the exception.
      * @throws BotException if the given string is null or empty.
      */

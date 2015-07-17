@@ -1,9 +1,13 @@
 package org.spacehq.libbot.module.builtin;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import org.spacehq.libbot.chat.ChatData;
-import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.module.BotException;
+import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.util.Conditions;
 import org.spacehq.libbot.util.HtmlEscaping;
 
@@ -22,162 +26,163 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Module for connecting to a Slack chat.
  */
 public class SlackModule implements Module {
-	private static final String BASE_URL = "https://slack.com/api/";
+    private static final String BASE_URL = "https://slack.com/api/";
 
-	private String id;
-	private String token;
-	private String channel;
-	private String username;
+    private String id;
+    private String token;
+    private String channel;
+    private String username;
 
-	private String channelId;
-	private double lastReceived;
-	private Map<String, String> users = new HashMap<String, String>();
-	private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
+    private String channelId;
+    private double lastReceived;
+    private Map<String, String> users = new HashMap<String, String>();
+    private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
 
-	/**
-	 * Creates a new SlackModule instance.
-	 * @param id ID of the module.
-	 * @param token Slack API token to use.
-	 * @param channel Channel to connect to.
-	 * @param username Username to connect with.
-	 */
-	public SlackModule(String id, String token, String channel, String username) {
-		Conditions.notNullOrEmpty(id, "Id");
-		Conditions.notNullOrEmpty(token, "Token");
-		Conditions.notNullOrEmpty(channel, "Channel");
-		Conditions.notNullOrEmpty(username, "Username");
+    /**
+     * Creates a new SlackModule instance.
+     *
+     * @param id       ID of the module.
+     * @param token    Slack API token to use.
+     * @param channel  Channel to connect to.
+     * @param username Username to connect with.
+     */
+    public SlackModule(String id, String token, String channel, String username) {
+        Conditions.notNullOrEmpty(id, "Id");
+        Conditions.notNullOrEmpty(token, "Token");
+        Conditions.notNullOrEmpty(channel, "Channel");
+        Conditions.notNullOrEmpty(username, "Username");
 
-		this.id = id;
-		this.token = token;
-		this.channel = channel;
-		this.username = username;
-	}
+        this.id = id;
+        this.token = token;
+        this.channel = channel;
+        this.username = username;
+    }
 
-	@Override
-	public String getId() {
-		return this.id;
-	}
+    @Override
+    public String getId() {
+        return this.id;
+    }
 
-	@Override
-	public boolean isConnected() {
-		return this.channelId != null;
-	}
+    @Override
+    public boolean isConnected() {
+        return this.channelId != null;
+    }
 
-	@Override
-	public void connect() {
-		this.channelId = this.call("channels.join", "name", this.channel).get("channel").getAsJsonObject().get("id").getAsString();
-		this.lastReceived = System.currentTimeMillis() / 1000.0;
-	}
+    @Override
+    public void connect() {
+        this.channelId = this.call("channels.join", "name", this.channel).get("channel").getAsJsonObject().get("id").getAsString();
+        this.lastReceived = System.currentTimeMillis() / 1000.0;
+    }
 
-	@Override
-	public void disconnect(String reason) {
-		if(this.channelId != null) {
-			System.out.println("[" + this.id + "] Disconnected: " + reason);
-			this.call("channels.leave", "channel", this.channelId);
-			this.channelId = null;
-			this.lastReceived = 0;
-			this.users.clear();
-		}
-	}
+    @Override
+    public void disconnect(String reason) {
+        if(this.channelId != null) {
+            System.out.println("[" + this.id + "] Disconnected: " + reason);
+            this.call("channels.leave", "channel", this.channelId);
+            this.channelId = null;
+            this.lastReceived = 0;
+            this.users.clear();
+        }
+    }
 
-	@Override
-	public String getUsername() {
-		return this.username;
-	}
+    @Override
+    public String getUsername() {
+        return this.username;
+    }
 
-	@Override
-	public void setUsername(String name) {
-		Conditions.notNullOrEmpty(name, "Username");
+    @Override
+    public void setUsername(String name) {
+        Conditions.notNullOrEmpty(name, "Username");
 
-		this.username = name;
-	}
+        this.username = name;
+    }
 
-	@Override
-	public List<ChatData> getIncomingChat() {
-		List<ChatData> incoming = new ArrayList<ChatData>(this.incoming);
-		this.incoming.removeAll(incoming);
-		return incoming;
-	}
+    @Override
+    public List<ChatData> getIncomingChat() {
+        List<ChatData> incoming = new ArrayList<ChatData>(this.incoming);
+        this.incoming.removeAll(incoming);
+        return incoming;
+    }
 
-	@Override
-	public void chat(String message) {
-		if(this.channelId == null) {
-			return;
-		}
+    @Override
+    public void chat(String message) {
+        if(this.channelId == null) {
+            return;
+        }
 
-		for(String msg : message.split("\n")) {
-			this.call("chat.postMessage", "channel", this.channelId, "text", msg, "username", this.username);
-		}
-	}
+        for(String msg : message.split("\n")) {
+            this.call("chat.postMessage", "channel", this.channelId, "text", msg, "username", this.username);
+        }
+    }
 
-	@Override
-	public void update() {
-		if(this.channelId == null) {
-			return;
-		}
+    @Override
+    public void update() {
+        if(this.channelId == null) {
+            return;
+        }
 
-		this.users.clear();
-		JsonObject users = this.call("users.list");
-		for(JsonElement e : users.get("members").getAsJsonArray()) {
-			JsonObject member = e.getAsJsonObject();
-			this.users.put(member.get("id").getAsString(), member.get("name").getAsString());
-		}
+        this.users.clear();
+        JsonObject users = this.call("users.list");
+        for(JsonElement e : users.get("members").getAsJsonArray()) {
+            JsonObject member = e.getAsJsonObject();
+            this.users.put(member.get("id").getAsString(), member.get("name").getAsString());
+        }
 
-		JsonObject history = this.call("channels.history", "channel", this.channelId, "count", String.valueOf(10));
-		double latest = this.lastReceived;
-		JsonArray messages = history.get("messages").getAsJsonArray();
-		for(int index = messages.size() - 1; index >= 0; index--) {
-			JsonObject message = messages.get(index).getAsJsonObject();
-			if(message.has("message")) {
-				message = message.get("message").getAsJsonObject();
-			}
+        JsonObject history = this.call("channels.history", "channel", this.channelId, "count", String.valueOf(10));
+        double latest = this.lastReceived;
+        JsonArray messages = history.get("messages").getAsJsonArray();
+        for(int index = messages.size() - 1; index >= 0; index--) {
+            JsonObject message = messages.get(index).getAsJsonObject();
+            if(message.has("message")) {
+                message = message.get("message").getAsJsonObject();
+            }
 
-			if(message.get("type").getAsString().equals("message")) {
-				String user = message.has("user") ? message.get("user").getAsString() : message.get("username").getAsString();
-				double timestamp = message.get("ts").getAsDouble();
-				String text = HtmlEscaping.unescape(message.get("text").getAsString()).replaceAll("<@U(\\w+)\\|(\\w+)>", "$2");
-				if(timestamp > this.lastReceived) {
-					this.incoming.add(new ChatData(this.users.containsKey(user) ? this.users.get(user) : user, text));
-					if(timestamp > latest) {
-						latest = timestamp;
-					}
-				}
-			}
-		}
+            if(message.get("type").getAsString().equals("message")) {
+                String user = message.has("user") ? message.get("user").getAsString() : message.get("username").getAsString();
+                double timestamp = message.get("ts").getAsDouble();
+                String text = HtmlEscaping.unescape(message.get("text").getAsString()).replaceAll("<@U(\\w+)\\|(\\w+)>", "$2");
+                if(timestamp > this.lastReceived) {
+                    this.incoming.add(new ChatData(this.users.containsKey(user) ? this.users.get(user) : user, text));
+                    if(timestamp > latest) {
+                        latest = timestamp;
+                    }
+                }
+            }
+        }
 
-		this.lastReceived = latest;
-		try {
-			Thread.sleep(500);
-		} catch(InterruptedException e) {
-		}
-	}
+        this.lastReceived = latest;
+        try {
+            Thread.sleep(500);
+        } catch(InterruptedException e) {
+        }
+    }
 
-	private JsonObject call(String method, String... params) {
-		InputStream in = null;
-		try {
-			StringBuilder build = new StringBuilder();
-			build.append("?token=").append(URLEncoder.encode(this.token, "UTF-8"));
-			for(int index = 0; index < params.length; index += 2) {
-				build.append("&").append(params[index]).append("=").append(URLEncoder.encode(params[index + 1], "UTF-8"));
-			}
+    private JsonObject call(String method, String... params) {
+        InputStream in = null;
+        try {
+            StringBuilder build = new StringBuilder();
+            build.append("?token=").append(URLEncoder.encode(this.token, "UTF-8"));
+            for(int index = 0; index < params.length; index += 2) {
+                build.append("&").append(params[index]).append("=").append(URLEncoder.encode(params[index + 1], "UTF-8"));
+            }
 
-			in = new URL(BASE_URL + method + build.toString()).openStream();
-			JsonObject json = new Gson().fromJson(new InputStreamReader(in), JsonObject.class);
-			JsonPrimitive ok = json.get("ok").getAsJsonPrimitive();
-			if((ok.isBoolean() && !json.get("ok").getAsBoolean()) || (ok.isNumber() && json.get("ok").getAsInt() != 1)) {
-				throw new BotException("Failed to call Slack API method \"" + method + "\": " + json.get("error").getAsString());
-			}
+            in = new URL(BASE_URL + method + build.toString()).openStream();
+            JsonObject json = new Gson().fromJson(new InputStreamReader(in), JsonObject.class);
+            JsonPrimitive ok = json.get("ok").getAsJsonPrimitive();
+            if((ok.isBoolean() && !json.get("ok").getAsBoolean()) || (ok.isNumber() && json.get("ok").getAsInt() != 1)) {
+                throw new BotException("Failed to call Slack API method \"" + method + "\": " + json.get("error").getAsString());
+            }
 
-			return json;
-		} catch(Exception e) {
-			throw new BotException("Failed to call Slack API method \"" + method + "\".", e);
-		} finally {
-			if(in != null) {
-				try {
-					in.close();
-				} catch(IOException e) {
-				}
-			}
-		}
-	}
+            return json;
+        } catch(Exception e) {
+            throw new BotException("Failed to call Slack API method \"" + method + "\".", e);
+        } finally {
+            if(in != null) {
+                try {
+                    in.close();
+                } catch(IOException e) {
+                }
+            }
+        }
+    }
 }
