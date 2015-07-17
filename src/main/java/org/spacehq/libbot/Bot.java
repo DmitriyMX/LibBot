@@ -5,6 +5,7 @@ import org.spacehq.libbot.chat.cmd.CommandManager;
 import org.spacehq.libbot.module.Module;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -132,7 +133,7 @@ public abstract class Bot {
             t.printStackTrace();
         }
 
-        for(String id : this.modules.keySet()) {
+        for(String id : new HashSet<String>(this.modules.keySet())) {
             this.removeModule(id);
         }
     }
