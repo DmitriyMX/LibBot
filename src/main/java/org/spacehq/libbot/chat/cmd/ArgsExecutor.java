@@ -69,9 +69,4 @@ public class ArgsExecutor implements Module {
     public void chat(String message) {
         this.result.append(message).append("\n");
     }
-
-    @Override
-    public void update() {
-        this.source.update();
-    }
 }
