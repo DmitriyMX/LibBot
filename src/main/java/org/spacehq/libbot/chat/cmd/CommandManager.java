@@ -275,49 +275,53 @@ public class CommandManager {
     }
 
     private void execute(final Module source, final ChatData message, boolean ignoreThreading) {
-        String msg = message.getMessage().substring(this.prefix.length());
-        final String cmd = this.parser.getCommand(msg).toLowerCase();
-        String prefixed = this.prefix + cmd;
-        final String args[] = this.parseArgs(source, join(this.parser.getArguments(msg)));
-        final ExecutionInfo exec = this.commands.get(cmd);
-        if(exec == null) {
-            if(this.unknownCommandFormat != null) {
-                source.chat(String.format(this.unknownCommandFormat, prefixed, message.getUser()));
-            }
-
-            return;
-        }
-
-        Command command = exec.getCommand();
-        if(!this.permManager.hasPermission(source, message.getUser(), command.permission())) {
-            if(this.permissionDeniedFormat != null) {
-                source.chat(String.format(this.permissionDeniedFormat, prefixed, message.getUser()));
-            }
-
-            return;
-        }
-
-        if(args.length < command.min() || (command.max() != -1 && args.length > command.max())) {
-            StringBuilder build = new StringBuilder();
-            if(this.incorrectUsageFormat != null) {
-                build.append(String.format(this.incorrectUsageFormat, prefixed, message.getUser())).append("\n");
-            }
-
-            if(this.usageFormat != null) {
-                build.append(String.format(this.usageFormat, prefixed + " " + command.usage())).append("\n");
-            }
-
-            String out = build.toString().trim();
-            if(!out.isEmpty()) {
-                source.chat(out);
-            }
-
-            return;
-        }
-
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
+                String msg = message.getMessage().substring(prefix.length());
+                String cmd = parser.getCommand(msg).toLowerCase();
+                if(cmd.isEmpty()) {
+                    return;
+                }
+
+                String prefixed = prefix + cmd;
+                String args[] = parseArgs(source, join(parser.getArguments(msg)));
+                ExecutionInfo exec = commands.get(cmd);
+                if(exec == null) {
+                    if(unknownCommandFormat != null) {
+                        source.chat(String.format(unknownCommandFormat, prefixed, message.getUser()));
+                    }
+
+                    return;
+                }
+
+                Command command = exec.getCommand();
+                if(!permManager.hasPermission(source, message.getUser(), command.permission())) {
+                    if(permissionDeniedFormat != null) {
+                        source.chat(String.format(permissionDeniedFormat, prefixed, message.getUser()));
+                    }
+
+                    return;
+                }
+
+                if(args.length < command.min() || (command.max() != -1 && args.length > command.max())) {
+                    StringBuilder build = new StringBuilder();
+                    if(incorrectUsageFormat != null) {
+                        build.append(String.format(incorrectUsageFormat, prefixed, message.getUser())).append("\n");
+                    }
+
+                    if(usageFormat != null) {
+                        build.append(String.format(usageFormat, prefixed + " " + command.usage())).append("\n");
+                    }
+
+                    String out = build.toString().trim();
+                    if(!out.isEmpty()) {
+                        source.chat(out);
+                    }
+
+                    return;
+                }
+
                 exec.execute(source, CommandManager.this, message.getUser(), cmd, args);
             }
         };
