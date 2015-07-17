@@ -148,7 +148,7 @@ public class SkypeModule implements Module {
 
     private void receive(ChatMessage chatMessage, String content) {
         if(this.chat.getIdentity().equals(chatMessage.getChat().getIdentity()) && chatMessage.getTime() > this.startTime) {
-            this.incoming.add(new ChatData(chatMessage.getSender().getDisplayName() != null ? chatMessage.getSender().getDisplayName() : chatMessage.getSender().getUsername(), content.trim()));
+            this.incoming.add(new ChatData(chatMessage.getSender().getUsername(), content.trim()));
         }
     }
 
