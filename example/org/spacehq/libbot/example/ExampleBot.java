@@ -35,7 +35,7 @@ public class ExampleBot extends Bot {
         this.getCommandManager().register(new ExampleCommands());
 
         if(CONSOLE) {
-            this.addModule(new ConsoleModule("Console", this));
+            this.addModule(new ConsoleModule("Console"));
         }
 
         if(MINECRAFT) {

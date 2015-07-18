@@ -1,6 +1,5 @@
 package org.spacehq.libbot.module.builtin;
 
-import org.spacehq.libbot.Bot;
 import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.util.Conditions;
@@ -17,7 +16,6 @@ import java.util.List;
  */
 public class ConsoleModule implements Module {
     private String id;
-    private Bot bot;
 
     private List<ChatData> incoming = new ArrayList<ChatData>();
     private boolean running = false;
@@ -26,14 +24,11 @@ public class ConsoleModule implements Module {
      * Creates a new ConsoleModule instance.
      *
      * @param id  ID of the module.
-     * @param bot Bot the module belongs to.
      */
-    public ConsoleModule(String id, Bot bot) {
+    public ConsoleModule(String id) {
         Conditions.notNullOrEmpty(id, "Id");
-        Conditions.notNull(bot, "Bot");
 
         this.id = id;
-        this.bot = bot;
     }
 
     @Override
@@ -90,12 +85,7 @@ public class ConsoleModule implements Module {
             while(isConnected()) {
                 try {
                     if(read.ready()) {
-                        String line = read.readLine();
-                        if(line.startsWith(bot.getCommandManager().getPrefix())) {
-                            incoming.add(new ChatData("Console", line));
-                        } else {
-                            incoming.add(new ChatData("Console", bot.getCommandManager().getPrefix() + line));
-                        }
+                        incoming.add(new ChatData("Console", read.readLine()));
                     }
                 } catch(IOException e) {
                     System.err.println("Failed to read line from console!");
