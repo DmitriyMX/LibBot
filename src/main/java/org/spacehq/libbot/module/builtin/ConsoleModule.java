@@ -89,7 +89,7 @@ public class ConsoleModule implements Module {
         @Override
         public void run() {
             BufferedReader read = new BufferedReader(new InputStreamReader(System.in));
-            while(true) {
+            while(bot.isRunning()) {
                 try {
                     if(read.ready()) {
                         String line = read.readLine();
