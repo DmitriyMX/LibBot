@@ -79,12 +79,6 @@ public class ConsoleModule implements Module {
     }
 
     private class ConsoleReader implements Runnable {
-        private boolean reading = true;
-
-        public void stopReading() {
-            this.reading = false;
-        }
-
         @Override
         public void run() {
             BufferedReader read = new BufferedReader(new InputStreamReader(System.in));
