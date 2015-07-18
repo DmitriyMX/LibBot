@@ -193,8 +193,7 @@ public class SkypeModule implements Module {
     public void chat(String message) {
         if(this.skype != null && this.chat != null) {
             try {
-                ChatMessage msg = this.chat.sendMessage(Message.create().with(Text.plain(message)));
-                receive(msg, msg.getMessage().asPlaintext());
+                this.chat.sendMessage(Message.create().with(Text.plain(message)));
             } catch(IllegalArgumentException e) {
                 // TODO: Stop this from happening ("User must not be null" internally). Until then, swallow these exceptions.
             } catch(Exception e) {
