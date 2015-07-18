@@ -7,6 +7,7 @@ import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.util.Conditions;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -95,6 +96,10 @@ public class IRCModule extends PircBot implements Module {
 
     @Override
     public List<ChatData> getIncomingChat() {
+        if(this.incoming.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         List<ChatData> ret = new ArrayList<ChatData>(this.incoming);
         this.incoming.clear();
         return ret;

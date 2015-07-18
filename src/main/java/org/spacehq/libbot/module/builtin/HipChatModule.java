@@ -17,8 +17,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Module for connecting to a HipChat room.
@@ -34,7 +34,7 @@ public class HipChatModule implements Module {
 
     private String roomId;
     private long lastReceived;
-    private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
+    private List<ChatData> incoming = new ArrayList<ChatData>();
 
     private long lastUpdate;
 
@@ -111,6 +111,10 @@ public class HipChatModule implements Module {
 
     @Override
     public List<ChatData> getIncomingChat() {
+        if(this.incoming.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         List<ChatData> incoming = new ArrayList<ChatData>(this.incoming);
         this.incoming.removeAll(incoming);
         return incoming;

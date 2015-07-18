@@ -20,8 +20,8 @@ import org.spacehq.libbot.util.Conditions;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Handler;
 import java.util.logging.Logger;
 
@@ -44,9 +44,8 @@ public class SkypeModule implements Module {
     private boolean autoReconnect;
 
     private Skype skype;
-    private Chat chat;
 
-    private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
+    private List<ChatData> incoming = new ArrayList<ChatData>();
     private long startTime;
 
     /**
@@ -90,7 +89,7 @@ public class SkypeModule implements Module {
 
     @Override
     public boolean isConnected() {
-        return this.skype != null && this.chat != null;
+        return this.skype != null;
     }
 
     @Override
@@ -100,8 +99,7 @@ public class SkypeModule implements Module {
             ((SkypeImpl) this.skype).login();
             this.skype.subscribe();
 
-            this.chat = this.skype.getChat(this.chatId);
-            if(this.chat == null) {
+            if(this.skype.getChat(this.chatId) == null) {
                 throw new BotException("Chat \"" + this.chatId + "\" does not exist.");
             }
 
@@ -147,7 +145,7 @@ public class SkypeModule implements Module {
     }
 
     private void receive(ChatMessage chatMessage, String content) {
-        if(this.chat.getIdentity().equals(chatMessage.getChat().getIdentity()) && chatMessage.getTime() > this.startTime) {
+        if(this.chatId.equals(chatMessage.getChat().getIdentity()) && chatMessage.getTime() > this.startTime) {
             this.incoming.add(new ChatData(chatMessage.getSender().getUsername(), content.trim()));
         }
     }
@@ -156,8 +154,6 @@ public class SkypeModule implements Module {
     public void disconnect(String reason) {
         if(this.skype != null) {
             System.out.println("[" + this.id + "] Disconnected: " + reason);
-            this.chat = null;
-
             try {
                 this.skype.logout();
             } catch(IOException e) {
@@ -170,7 +166,7 @@ public class SkypeModule implements Module {
 
     @Override
     public String getUsername() {
-        if(this.skype != null && this.chat != null) {
+        if(this.skype != null) {
             return this.skype.getUsername();
         } else {
             return this.username;
@@ -184,6 +180,10 @@ public class SkypeModule implements Module {
 
     @Override
     public List<ChatData> getIncomingChat() {
+        if(this.incoming.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         List<ChatData> incoming = new ArrayList<ChatData>(this.incoming);
         this.incoming.removeAll(incoming);
         return incoming;
@@ -191,9 +191,14 @@ public class SkypeModule implements Module {
 
     @Override
     public void chat(String message) {
-        if(this.skype != null && this.chat != null) {
+        if(this.skype != null) {
+            Chat chat = this.skype.getChat(this.chatId);
+            if(chat == null) {
+                throw new BotException("Chat no longer exists.");
+            }
+
             try {
-                this.chat.sendMessage(Message.create().with(Text.plain(message)));
+                chat.sendMessage(Message.create().with(Text.plain(message)));
             } catch(IllegalArgumentException e) {
                 // TODO: Stop this from happening ("User must not be null" internally). Until then, swallow these exceptions.
             } catch(Exception e) {

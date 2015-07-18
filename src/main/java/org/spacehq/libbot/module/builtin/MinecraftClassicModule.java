@@ -17,6 +17,7 @@ import org.spacehq.packetlib.event.session.SessionAdapter;
 import org.spacehq.packetlib.tcp.TcpSessionFactory;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,9 +36,10 @@ public class MinecraftClassicModule implements Module {
     private String host;
     private int port;
 
+    private List<Pattern> chatPatterns = new ArrayList<Pattern>();
+
     private Client conn;
     private List<ChatData> incoming = new ArrayList<ChatData>();
-    private List<Pattern> chatPatterns = new ArrayList<Pattern>();
 
     private MinecraftClassicModule(String id, String username) {
         Conditions.notNullOrEmpty(id, "Id");
@@ -219,6 +221,10 @@ public class MinecraftClassicModule implements Module {
 
     @Override
     public List<ChatData> getIncomingChat() {
+        if(this.incoming.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         List<ChatData> ret = new ArrayList<ChatData>(this.incoming);
         this.incoming.removeAll(ret);
         return ret;

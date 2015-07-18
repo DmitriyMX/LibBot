@@ -17,10 +17,10 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Module for connecting to a Slack chat.
@@ -36,7 +36,7 @@ public class SlackModule implements Module {
     private String channelId;
     private double lastReceived;
     private Map<String, String> users = new HashMap<String, String>();
-    private List<ChatData> incoming = new CopyOnWriteArrayList<ChatData>();
+    private List<ChatData> incoming = new ArrayList<ChatData>();
 
     /**
      * Creates a new SlackModule instance.
@@ -101,6 +101,10 @@ public class SlackModule implements Module {
 
     @Override
     public List<ChatData> getIncomingChat() {
+        if(this.incoming.isEmpty()) {
+            return Collections.emptyList();
+        }
+
         List<ChatData> incoming = new ArrayList<ChatData>(this.incoming);
         this.incoming.removeAll(incoming);
         return incoming;
