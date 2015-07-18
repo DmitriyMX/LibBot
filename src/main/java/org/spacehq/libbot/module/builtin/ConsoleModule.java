@@ -19,7 +19,7 @@ public class ConsoleModule implements Module {
     private Bot bot;
 
     private List<ChatData> incoming = new ArrayList<ChatData>();
-    private Thread thread;
+    private boolean running = false;
 
     /**
      * Creates a new ConsoleModule instance.
@@ -42,19 +42,18 @@ public class ConsoleModule implements Module {
 
     @Override
     public boolean isConnected() {
-        return this.thread != null;
+        return this.running;
     }
 
     @Override
     public void connect() {
-        this.thread = new Thread(new ConsoleReader(), "ConsoleReader");
-        this.thread.start();
+        new Thread(new ConsoleReader(), "ConsoleReader").start();
+        this.running = true;
     }
 
     @Override
     public void disconnect(String reason) {
-        this.thread.interrupt();
-        this.thread = null;
+        this.running = false;
     }
 
     @Override
@@ -89,7 +88,7 @@ public class ConsoleModule implements Module {
         @Override
         public void run() {
             BufferedReader read = new BufferedReader(new InputStreamReader(System.in));
-            while(bot.isRunning()) {
+            while(isConnected()) {
                 try {
                     if(read.ready()) {
                         String line = read.readLine();
@@ -97,12 +96,6 @@ public class ConsoleModule implements Module {
                             incoming.add(new ChatData("Console", line));
                         } else {
                             incoming.add(new ChatData("Console", bot.getCommandManager().getPrefix() + line));
-                        }
-                    } else {
-                        try {
-                            Thread.sleep(100);
-                        } catch(InterruptedException e) {
-                            break;
                         }
                     }
                 } catch(IOException e) {
