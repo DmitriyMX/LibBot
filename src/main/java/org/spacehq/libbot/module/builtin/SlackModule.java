@@ -151,42 +151,44 @@ public class SlackModule implements Module {
     }
 
     private class SlackUpdater implements Runnable {
-        private long lastUpdate;
-
         @Override
         public void run() {
             while(isConnected()) {
-                if(System.currentTimeMillis() - this.lastUpdate >= 1000) {
-                    users.clear();
-                    for(JsonElement e : call("users.list").get("members").getAsJsonArray()) {
-                        JsonObject member = e.getAsJsonObject();
-                        users.put(member.get("id").getAsString(), member.get("name").getAsString());
+                users.clear();
+                for(JsonElement e : call("users.list").get("members").getAsJsonArray()) {
+                    JsonObject member = e.getAsJsonObject();
+                    users.put(member.get("id").getAsString(), member.get("name").getAsString());
+                }
+
+                JsonObject history = call("channels.history", "channel", channelId, "count", String.valueOf(10));
+                double latest = lastReceived;
+                JsonArray messages = history.get("messages").getAsJsonArray();
+                for(int index = messages.size() - 1; index >= 0; index--) {
+                    JsonObject message = messages.get(index).getAsJsonObject();
+                    if(message.has("message")) {
+                        message = message.get("message").getAsJsonObject();
                     }
 
-                    JsonObject history = call("channels.history", "channel", channelId, "count", String.valueOf(10));
-                    double latest = lastReceived;
-                    JsonArray messages = history.get("messages").getAsJsonArray();
-                    for(int index = messages.size() - 1; index >= 0; index--) {
-                        JsonObject message = messages.get(index).getAsJsonObject();
-                        if(message.has("message")) {
-                            message = message.get("message").getAsJsonObject();
-                        }
-
-                        if(message.get("type").getAsString().equals("message")) {
-                            String user = message.has("user") ? message.get("user").getAsString() : message.get("username").getAsString();
-                            double timestamp = message.get("ts").getAsDouble();
-                            String text = HtmlEscaping.unescape(message.get("text").getAsString()).replaceAll("<@U(\\w+)\\|(\\w+)>", "$2");
-                            if(timestamp > lastReceived) {
-                                incoming.add(new ChatData(users.containsKey(user) ? users.get(user) : user, text));
-                                if(timestamp > latest) {
-                                    latest = timestamp;
-                                }
+                    if(message.get("type").getAsString().equals("message")) {
+                        String user = message.has("user") ? message.get("user").getAsString() : message.get("username").getAsString();
+                        double timestamp = message.get("ts").getAsDouble();
+                        String text = HtmlEscaping.unescape(message.get("text").getAsString()).replaceAll("<@U(\\w+)\\|(\\w+)>", "$2");
+                        if(timestamp > lastReceived) {
+                            incoming.add(new ChatData(users.containsKey(user) ? users.get(user) : user, text));
+                            if(timestamp > latest) {
+                                latest = timestamp;
                             }
                         }
                     }
+                }
 
-                    lastReceived = latest;
-                    this.lastUpdate = System.currentTimeMillis();
+                lastReceived = latest;
+
+                // Make sure we don't make requests too quickly.
+                try {
+                    Thread.sleep(1000);
+                } catch(InterruptedException e) {
+                    break;
                 }
             }
         }

@@ -5,8 +5,8 @@ import org.spacehq.libbot.chat.cmd.CommandManager;
 import org.spacehq.libbot.module.Module;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,7 +16,7 @@ import java.util.Map;
 public abstract class Bot {
     private boolean running = true;
     private final CommandManager commands = new CommandManager();
-    private final Map<String, Module> modules = new LinkedHashMap<String, Module>();
+    private final Map<String, Module> modules = new HashMap<String, Module>();
 
     /**
      * Starts the bot.
@@ -67,8 +67,7 @@ public abstract class Bot {
     private final void run() {
         while(this.running) {
             try {
-                for(String id : this.modules.keySet()) {
-                    Module module = this.modules.get(id);
+                for(Module module : this.modules.values()) {
                     if(module.isConnected()) {
                         try {
                             List<ChatData> chat = module.getIncomingChat();
@@ -107,12 +106,18 @@ public abstract class Bot {
                             t.printStackTrace();
                         }
                     } else {
-                        this.removeModule(id);
+                        this.removeModule(module);
                     }
                 }
             } catch(Throwable t) {
                 System.err.println("[Bot] An error occurred while updating modules.");
                 t.printStackTrace();
+            }
+
+            try {
+                Thread.sleep(100);
+            } catch(InterruptedException e) {
+                break;
             }
         }
 
@@ -210,6 +215,20 @@ public abstract class Bot {
 
             return null;
         }
+    }
+
+    /**
+     * Removes a module from the bot.
+     *
+     * @param module Module to remove.
+     * @return The removed module.
+     */
+    public final Module removeModule(Module module) {
+        if(module == null) {
+            return null;
+        }
+
+        return this.removeModule(module.getId());
     }
 
     /**

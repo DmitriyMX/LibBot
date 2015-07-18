@@ -44,9 +44,7 @@ public class SkypeModule implements Module {
     private boolean autoReconnect;
 
     private Skype skype;
-
     private List<ChatData> incoming = new ArrayList<ChatData>();
-    private long startTime;
 
     /**
      * Creates a new SkypeModule instance.
@@ -103,22 +101,8 @@ public class SkypeModule implements Module {
                 throw new BotException("Chat \"" + this.chatId + "\" does not exist.");
             }
 
-            this.startTime = System.currentTimeMillis();
             this.skype.getEventDispatcher().registerListener(new Listener() {
-                @EventHandler
-                public void onMessageReceived(MessageReceivedEvent event) {
-                    receive(event.getMessage(), event.getMessage().getMessage().asPlaintext());
-                }
-
-                @EventHandler
-                public void onMessageEdited(MessageEditedEvent event) {
-                    receive(event.getMessage(), event.getNewContent());
-                }
-
-                @EventHandler
-                public void onMessageEditedByOther(MessageEditedByOtherEvent event) {
-                    receive(event.getMessage(), event.getNewContent());
-                }
+                private long startTime = System.currentTimeMillis();
 
                 @EventHandler
                 public void onDisconnected(DisconnectedEvent event) {
@@ -136,17 +120,32 @@ public class SkypeModule implements Module {
                         }
                     }
                 }
+
+                @EventHandler
+                public void onMessageReceived(MessageReceivedEvent event) {
+                    receive(event.getMessage(), event.getMessage().getMessage().asPlaintext());
+                }
+
+                @EventHandler
+                public void onMessageEdited(MessageEditedEvent event) {
+                    receive(event.getMessage(), event.getNewContent());
+                }
+
+                @EventHandler
+                public void onMessageEditedByOther(MessageEditedByOtherEvent event) {
+                    receive(event.getMessage(), event.getNewContent());
+                }
+
+                private void receive(ChatMessage chatMessage, String content) {
+                    if(chatId.equals(chatMessage.getChat().getIdentity()) && chatMessage.getTime() > this.startTime) {
+                        incoming.add(new ChatData(chatMessage.getSender().getUsername(), content.trim()));
+                    }
+                }
             });
         } catch(BotException e) {
             throw e;
         } catch(Exception e) {
             throw new BotException("Failed to connect Skype module.", e);
-        }
-    }
-
-    private void receive(ChatMessage chatMessage, String content) {
-        if(this.chatId.equals(chatMessage.getChat().getIdentity()) && chatMessage.getTime() > this.startTime) {
-            this.incoming.add(new ChatData(chatMessage.getSender().getUsername(), content.trim()));
         }
     }
 
