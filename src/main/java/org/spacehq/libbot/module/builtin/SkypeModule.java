@@ -10,6 +10,7 @@ import com.samczsun.skype4j.events.chat.DisconnectedEvent;
 import com.samczsun.skype4j.events.chat.message.MessageEditedByOtherEvent;
 import com.samczsun.skype4j.events.chat.message.MessageEditedEvent;
 import com.samczsun.skype4j.events.chat.message.MessageReceivedEvent;
+import com.samczsun.skype4j.exceptions.SkypeException;
 import com.samczsun.skype4j.formatting.Message;
 import com.samczsun.skype4j.formatting.Text;
 import com.samczsun.skype4j.internal.SkypeImpl;
@@ -198,9 +199,7 @@ public class SkypeModule implements Module {
 
             try {
                 chat.sendMessage(Message.create().with(Text.plain(message)));
-            } catch(IllegalArgumentException e) {
-                // TODO: Stop this from happening ("User must not be null" internally). Until then, swallow these exceptions.
-            } catch(Exception e) {
+            } catch(SkypeException e) {
                 throw new BotException("Failed to send chat message.", e);
             }
         } else {

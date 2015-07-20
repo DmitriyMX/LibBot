@@ -85,7 +85,7 @@ public class ConsoleModule implements Module {
             while(isConnected()) {
                 try {
                     if(read.ready()) {
-                        incoming.add(new ChatData("Console", read.readLine()));
+                        incoming.add(new ChatData(getUsername(), read.readLine()));
                     } else {
                         try {
                             Thread.sleep(100);
