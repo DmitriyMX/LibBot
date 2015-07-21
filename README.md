@@ -7,7 +7,8 @@ See example/org/spacehq/libbot/example
 ## Building the Source
 LibBot uses Maven to manage dependencies. Simply run 'mvn clean install' in the source's directory.
 
-Builds can be downloaded **[here](http://build.spacehq.org/job/LibBot)**.
+Builds can be downloaded **[here](https://build.spacehq.org/job/LibBot)**.
+Javadocs can be found **[here](https://build.spacehq.org/job/LibBot/javadoc)**.
 
 ## License
 LibBot is licensed under the **[MIT license](http://www.opensource.org/licenses/mit-license.html)**.
