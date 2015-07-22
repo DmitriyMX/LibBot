@@ -4,7 +4,7 @@ import org.spacehq.libbot.chat.ChatData;
 import org.spacehq.libbot.module.BotException;
 import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.util.Conditions;
-import org.spacehq.mc.classic.protocol.AuthenticationException;
+import org.spacehq.mc.classic.protocol.exception.AuthenticationException;
 import org.spacehq.mc.classic.protocol.ClassicProtocol;
 import org.spacehq.mc.classic.protocol.data.serverlist.ServerList;
 import org.spacehq.mc.classic.protocol.data.serverlist.ServerURLInfo;
@@ -180,7 +180,7 @@ public class MinecraftClassicModule implements Module {
                 throw new BotException("Failed to authenticate MinecraftClassicModule.", e);
             }
 
-            ServerURLInfo info = ServerList.getServerInfo(this.serverUrl);
+            ServerURLInfo info = ServerList.getServerURLInfo(this.serverUrl);
             host = info.getHost();
             port = info.getPort();
             username = info.getUsername();
