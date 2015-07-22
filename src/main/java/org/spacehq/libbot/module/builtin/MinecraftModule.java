@@ -6,8 +6,8 @@ import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.util.Conditions;
 import org.spacehq.mc.auth.GameProfile;
 import org.spacehq.mc.auth.exception.AuthenticationException;
+import org.spacehq.mc.protocol.MinecraftConstants;
 import org.spacehq.mc.protocol.MinecraftProtocol;
-import org.spacehq.mc.protocol.ProtocolConstants;
 import org.spacehq.mc.protocol.data.message.Message;
 import org.spacehq.mc.protocol.data.message.TextMessage;
 import org.spacehq.mc.protocol.data.message.TranslationMessage;
@@ -173,7 +173,7 @@ public class MinecraftModule implements Module {
             return this.username;
         }
 
-        return this.conn.getSession().<GameProfile>getFlag(ProtocolConstants.PROFILE_KEY).getName();
+        return this.conn.getSession().<GameProfile>getFlag(MinecraftConstants.PROFILE_KEY).getName();
     }
 
     @Override
