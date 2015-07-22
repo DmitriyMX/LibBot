@@ -5,7 +5,7 @@ import org.spacehq.libbot.module.BotException;
 import org.spacehq.libbot.module.Module;
 import org.spacehq.libbot.util.Conditions;
 import org.spacehq.mc.auth.GameProfile;
-import org.spacehq.mc.auth.exception.authentication.AuthenticationException;
+import org.spacehq.mc.auth.exception.request.RequestException;
 import org.spacehq.mc.protocol.MinecraftConstants;
 import org.spacehq.mc.protocol.MinecraftProtocol;
 import org.spacehq.mc.protocol.data.message.Message;
@@ -150,7 +150,7 @@ public class MinecraftModule implements Module {
             this.conn = new Client(this.host, this.port, new MinecraftProtocol(this.username, this.password, false), new TcpSessionFactory());
             this.conn.getSession().addListener(new BotListener());
             this.conn.getSession().connect();
-        } catch(AuthenticationException e) {
+        } catch(RequestException e) {
             throw new BotException("Failed to authenticate MinecraftModule.", e);
         }
     }
