@@ -217,6 +217,9 @@ public class MinecraftModule implements Module {
         @Override
         public void disconnected(DisconnectedEvent event) {
             disconnect(Message.fromString(event.getReason()).getFullText());
+            if(event.getCause() != null) {
+                event.getCause().printStackTrace();
+            }
         }
 
         private void parseChat(Message message) {

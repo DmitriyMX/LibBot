@@ -248,6 +248,9 @@ public class MinecraftClassicModule implements Module {
         @Override
         public void disconnected(DisconnectedEvent event) {
             disconnect(event.getReason());
+            if(event.getCause() != null) {
+                event.getCause().printStackTrace();
+            }
         }
 
         private void parseChat(String message) {
