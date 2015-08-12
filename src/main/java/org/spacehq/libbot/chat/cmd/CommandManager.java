@@ -338,9 +338,10 @@ public class CommandManager {
         int execCount = 0;
         int argStart = -1;
         List<String> args = new ArrayList<String>();
+        StringBuilder arg = new StringBuilder();
         for(int index = 0; index < str.length(); index++) {
             char c = str.charAt(index);
-            if(str.indexOf("!exec{", index) == index) {
+            if(c == '!' && str.indexOf("!exec{", index) == index) {
                 if(execStart == -1) {
                     execStart = index + "!exec{".length();
                 }
@@ -349,7 +350,7 @@ public class CommandManager {
             } else if(execStart != -1) {
                 if(c == '}' && str.charAt(index - 1) != '\\') {
                     execCount--;
-                    if(execCount == 0) {
+                    if(execCount == 0 && index - execStart > 0) {
                         ArgsExecutor exec = new ArgsExecutor(source);
                         String cmd = str.substring(execStart, index);
                         if(!cmd.startsWith(this.getPrefix())) {
@@ -357,25 +358,22 @@ public class CommandManager {
                         }
 
                         this.execute(exec, new ChatData(source.getUsername(), cmd), true);
-                        args.add(exec.getResult());
+                        arg.append(exec.getResult());
                         execStart = -1;
                     }
                 }
             } else {
-                if(argStart == -1 && c != ' ') {
-                    argStart = index;
-                }
-
-                if(argStart != -1 && (c == ' ' || index == str.length() - 1)) {
-                    int end = index;
-                    if(c != ' ') {
-                        end++;
-                    }
-
-                    args.add(str.substring(argStart, end));
-                    argStart = -1;
+                if(c != ' ') {
+                    arg.append(c);
+                } else if(arg.length() > 0) {
+                    args.add(arg.toString());
+                    arg = new StringBuilder();
                 }
             }
+        }
+
+        if(arg.length() > 0) {
+            args.add(arg.toString());
         }
 
         return args.toArray(new String[args.size()]);
