@@ -76,7 +76,7 @@ public class CommandManager {
     /**
      * Sets whether commands should be executed in a unique thread.
      *
-     * @return Whether commands should be multithreaded.
+     * @param multiThreaded Whether commands should be multithreaded.
      */
     public void setMultiThreaded(boolean multiThreaded) {
         this.multiThreaded = multiThreaded;
@@ -94,7 +94,7 @@ public class CommandManager {
     /**
      * Sets whether commands sent using the bot's username should be accepted.
      *
-     * @return Whether commands sent using the bot's username should be accepted.
+     * @param accept Whether commands sent using the bot's username should be accepted.
      */
     public void setAcceptCommandsFromSelf(boolean accept) {
         this.acceptCommandsFromSelf = accept;
@@ -132,7 +132,7 @@ public class CommandManager {
      * Sets the format used when sending an unknown command message.
      * The first parameter provided is the command name, and the second parameter provided is the user who used the command.
      *
-     * @return Format to use when sending an unknown command message.
+     * @param format Format to use when sending an unknown command message.
      */
     public void setUnknownCommandFormat(String format) {
         this.unknownCommandFormat = format;
@@ -152,7 +152,7 @@ public class CommandManager {
      * Sets the format used when sending a permission denied message.
      * The first parameter provided is the command name the permission is for, and the second parameter provided is the user who used the command.
      *
-     * @return Format to use when sending a permission denied message.
+     * @param format Format to use when sending a permission denied message.
      */
     public void setPermissionDeniedFormat(String format) {
         this.permissionDeniedFormat = format;
@@ -172,7 +172,7 @@ public class CommandManager {
      * Sets the format used when sending an incorrect usage message.
      * The first parameter provided is the command name, and the second parameter provided is the user who used the command.
      *
-     * @return Format to use when sending an incorrect usage message.
+     * @param format Format to use when sending an incorrect usage message.
      */
     public void setIncorrectUsageFormat(String format) {
         this.incorrectUsageFormat = format;
@@ -192,7 +192,7 @@ public class CommandManager {
      * Sets the format used when sending a usage message.
      * The only parameter provided is the command's usage information.
      *
-     * @return Format to use when sending a usage message.
+     * @param format Format to use when sending a usage message.
      */
     public void setUsageFormat(String format) {
         this.usageFormat = format;

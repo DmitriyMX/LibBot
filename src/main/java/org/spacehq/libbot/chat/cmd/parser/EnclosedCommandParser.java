@@ -2,7 +2,7 @@ package org.spacehq.libbot.chat.cmd.parser;
 
 /**
  * Parses a command in the style of a method invocation.
- * <p/>
+ *
  * command(arg1, arg2, arg3...)
  */
 public class EnclosedCommandParser implements CommandParser {
