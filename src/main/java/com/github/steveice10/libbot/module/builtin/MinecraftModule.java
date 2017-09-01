@@ -1,9 +1,9 @@
 package com.github.steveice10.libbot.module.builtin;
 
-import com.github.steveice10.libbot.util.Conditions;
 import com.github.steveice10.libbot.chat.ChatData;
 import com.github.steveice10.libbot.module.BotException;
 import com.github.steveice10.libbot.module.Module;
+import com.github.steveice10.libbot.util.Conditions;
 import com.github.steveice10.mc.auth.data.GameProfile;
 import com.github.steveice10.mc.auth.exception.request.RequestException;
 import com.github.steveice10.mc.protocol.MinecraftConstants;

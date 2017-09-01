@@ -1,12 +1,12 @@
 package com.github.steveice10.libbot.module.builtin;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
 import com.github.steveice10.libbot.chat.ChatData;
 import com.github.steveice10.libbot.module.BotException;
 import com.github.steveice10.libbot.module.Module;
 import com.github.steveice10.libbot.util.Conditions;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import java.io.IOException;
 import java.io.InputStream;

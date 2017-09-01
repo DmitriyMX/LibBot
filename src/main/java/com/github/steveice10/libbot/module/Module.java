@@ -6,7 +6,7 @@ import java.util.List;
 
 /**
  * A module used to connect to a chat source.
- *
+ * <p>
  * Module methods may throw a ModuleException if a communication error occurs.
  */
 public interface Module {

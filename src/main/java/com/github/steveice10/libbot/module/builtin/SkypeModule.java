@@ -1,5 +1,9 @@
 package com.github.steveice10.libbot.module.builtin;
 
+import com.github.steveice10.libbot.chat.ChatData;
+import com.github.steveice10.libbot.module.BotException;
+import com.github.steveice10.libbot.module.Module;
+import com.github.steveice10.libbot.util.Conditions;
 import com.samczsun.skype4j.Skype;
 import com.samczsun.skype4j.SkypeBuilder;
 import com.samczsun.skype4j.chat.Chat;
@@ -12,10 +16,6 @@ import com.samczsun.skype4j.exceptions.ConnectionException;
 import com.samczsun.skype4j.exceptions.SkypeException;
 import com.samczsun.skype4j.formatting.Message;
 import com.samczsun.skype4j.formatting.Text;
-import com.github.steveice10.libbot.chat.ChatData;
-import com.github.steveice10.libbot.module.BotException;
-import com.github.steveice10.libbot.module.Module;
-import com.github.steveice10.libbot.util.Conditions;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -46,10 +46,10 @@ public class SkypeModule implements Module {
     /**
      * Creates a new SkypeModule instance.
      *
-     * @param id            ID of the module.
-     * @param username      Username to connect with.
-     * @param password      Password to connect with.
-     * @param chatId        ID of the chat to connect to.
+     * @param id       ID of the module.
+     * @param username Username to connect with.
+     * @param password Password to connect with.
+     * @param chatId   ID of the chat to connect to.
      */
     public SkypeModule(String id, String username, String password, String chatId) {
         Conditions.notNullOrEmpty(id, "Id");

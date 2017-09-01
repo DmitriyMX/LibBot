@@ -1,13 +1,13 @@
 package com.github.steveice10.libbot.module.builtin;
 
+import com.github.steveice10.libbot.chat.ChatData;
 import com.github.steveice10.libbot.module.BotException;
 import com.github.steveice10.libbot.module.Module;
 import com.github.steveice10.libbot.util.Conditions;
-import com.github.steveice10.libbot.chat.ChatData;
-import com.github.steveice10.mc.classic.protocol.exception.AuthenticationException;
 import com.github.steveice10.mc.classic.protocol.ClassicProtocol;
 import com.github.steveice10.mc.classic.protocol.data.serverlist.ServerList;
 import com.github.steveice10.mc.classic.protocol.data.serverlist.ServerURLInfo;
+import com.github.steveice10.mc.classic.protocol.exception.AuthenticationException;
 import com.github.steveice10.mc.classic.protocol.packet.client.ClientChatPacket;
 import com.github.steveice10.mc.classic.protocol.packet.server.ServerChatPacket;
 import com.github.steveice10.packetlib.Client;

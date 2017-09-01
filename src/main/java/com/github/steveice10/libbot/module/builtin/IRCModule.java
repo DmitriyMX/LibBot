@@ -1,10 +1,10 @@
 package com.github.steveice10.libbot.module.builtin;
 
-import org.jibble.pircbot.PircBot;
 import com.github.steveice10.libbot.chat.ChatData;
 import com.github.steveice10.libbot.module.BotException;
 import com.github.steveice10.libbot.module.Module;
 import com.github.steveice10.libbot.util.Conditions;
+import org.jibble.pircbot.PircBot;
 
 import java.util.ArrayList;
 import java.util.Collections;

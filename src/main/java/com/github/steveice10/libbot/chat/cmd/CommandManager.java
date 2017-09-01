@@ -1,11 +1,11 @@
 package com.github.steveice10.libbot.chat.cmd;
 
+import com.github.steveice10.libbot.chat.ChatData;
 import com.github.steveice10.libbot.chat.cmd.parser.CommandParser;
+import com.github.steveice10.libbot.chat.cmd.parser.SpacedCommandParser;
 import com.github.steveice10.libbot.chat.cmd.permission.EmptyPermissionManager;
 import com.github.steveice10.libbot.chat.cmd.permission.PermissionManager;
 import com.github.steveice10.libbot.module.Module;
-import com.github.steveice10.libbot.chat.ChatData;
-import com.github.steveice10.libbot.chat.cmd.parser.SpacedCommandParser;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;

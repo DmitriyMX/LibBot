@@ -1,8 +1,8 @@
 package com.github.steveice10.libbot;
 
-import com.github.steveice10.libbot.module.Module;
 import com.github.steveice10.libbot.chat.ChatData;
 import com.github.steveice10.libbot.chat.cmd.CommandManager;
+import com.github.steveice10.libbot.module.Module;
 
 import java.util.Collection;
 import java.util.HashMap;

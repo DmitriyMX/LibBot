@@ -1,8 +1,8 @@
 package com.github.steveice10.libbot.module.builtin;
 
+import com.github.steveice10.libbot.chat.ChatData;
 import com.github.steveice10.libbot.module.Module;
 import com.github.steveice10.libbot.util.Conditions;
-import com.github.steveice10.libbot.chat.ChatData;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -23,7 +23,7 @@ public class ConsoleModule implements Module {
     /**
      * Creates a new ConsoleModule instance.
      *
-     * @param id  ID of the module.
+     * @param id ID of the module.
      */
     public ConsoleModule(String id) {
         Conditions.notNullOrEmpty(id, "Id");
